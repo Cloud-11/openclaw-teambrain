@@ -136,4 +136,51 @@ describe("createTeamBrainWritebackTool", () => {
     expect(elapsed).toBeGreaterThanOrEqual(80);
     expect(content).toContain("等待锁释放后写入");
   });
+
+  it("锁超时时会返回可诊断的结果，而不是静默失败", async () => {
+    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-timeout-"));
+    tempDirs.push(root);
+
+    const config = normalizeTeamBrainConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+    });
+
+    const stateDir = join(root, "my-dev-team/projects/stardew-mod/state");
+    const lockDir = join(stateDir, ".teambrain.lock");
+    await mkdir(lockDir, { recursive: true });
+    await writeUtf8(
+      join(lockDir, ".lock-meta.json"),
+      JSON.stringify(
+        {
+          callId: "call-stuck",
+          action: "upsert_todo",
+        },
+        null,
+        2,
+      ),
+    );
+
+    const tool = createTeamBrainWritebackTool(
+      config,
+      {
+        lockOptions: {
+          retryMs: 10,
+          timeoutMs: 40,
+        },
+      },
+    );
+
+    const result = await tool.execute("call-6", {
+      action: "upsert_todo",
+      text: "不会写入成功",
+      done: false,
+    });
+
+    expect(result.content[0]?.text).toContain("获取 TeamBrain 写锁失败");
+    expect((result.details as { lockInfo?: { callId?: string } }).lockInfo?.callId).toBe(
+      "call-stuck",
+    );
+  });
 });

@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { PluginTool } from "openclaw/plugin-sdk/core";
 import type { TeamBrainConfig } from "./config.ts";
-import { withDirectoryLock } from "./file-lock.ts";
+import { DirectoryLockTimeoutError, type LockOptions, withDirectoryLock } from "./file-lock.ts";
 import { readOptionalUtf8 } from "./files.ts";
 
 type ProjectStateSnapshot = {
@@ -205,7 +205,14 @@ function toolResult(text: string, details: unknown) {
   };
 }
 
-export function createTeamBrainWritebackTool(config: TeamBrainConfig): PluginTool {
+type WritebackToolOptions = {
+  lockOptions?: Omit<LockOptions, "metadata">;
+};
+
+export function createTeamBrainWritebackTool(
+  config: TeamBrainConfig,
+  options?: WritebackToolOptions,
+): PluginTool {
   return {
     name: "teambrain-state",
     label: "TeamBrain State",
@@ -234,23 +241,45 @@ export function createTeamBrainWritebackTool(config: TeamBrainConfig): PluginToo
       const action = requireAction(params);
       await ensureStateDir(config);
 
-      return withDirectoryLock(getLockDir(config), async () => {
-        if (action === "set_project_state") {
-          const result = await writeProjectState(config, params);
-          return toolResult(`已更新 ${result.filePath}`, {
+      try {
+        return await withDirectoryLock(
+          getLockDir(config),
+          async () => {
+            if (action === "set_project_state") {
+              const result = await writeProjectState(config, params);
+              return toolResult(`已更新 ${result.filePath}`, {
+                action,
+                filePath: result.filePath,
+                snapshot: result.snapshot,
+              });
+            }
+
+            const result = await writeTodo(config, params);
+            return toolResult(`已更新 ${result.filePath}`, {
+              action,
+              filePath: result.filePath,
+              items: result.items,
+            });
+          },
+          {
+            ...options?.lockOptions,
+            metadata: {
+              callId: _id,
+              action,
+            },
+          },
+        );
+      } catch (error) {
+        if (error instanceof DirectoryLockTimeoutError) {
+          return toolResult(`获取 TeamBrain 写锁失败：${error.message}`, {
             action,
-            filePath: result.filePath,
-            snapshot: result.snapshot,
+            lockDir: error.lockDir,
+            lockInfo: error.lockInfo,
           });
         }
 
-        const result = await writeTodo(config, params);
-        return toolResult(`已更新 ${result.filePath}`, {
-          action,
-          filePath: result.filePath,
-          items: result.items,
-        });
-      });
+        throw error;
+      }
     },
   };
 }

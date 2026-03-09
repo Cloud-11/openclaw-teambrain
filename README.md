@@ -13,6 +13,7 @@
 - V2 now injects a compact write-back protocol for agents and respects runtime `tokenBudget`
 - V3 adds role-aware write-back guidance and state-directory locking
 - V4 makes role mapping and role protocol policies configurable
+- Task 1 admin commands now cover init, switch, and health-check for local TeamBrain setup
 - GitHub community, CI, release, and maintainer foundations are included
 
 ## Why TeamBrain
@@ -121,6 +122,28 @@ npm test
 npm run typecheck
 ```
 
+## Local Admin Commands
+
+Initialize a minimal TeamBrain:
+
+```bash
+npm run teambrain:init -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+```
+
+Switch or bootstrap a project workspace:
+
+```bash
+npm run teambrain:switch -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+```
+
+Check current TeamBrain health:
+
+```bash
+npm run teambrain:health -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+```
+
+These commands print structured JSON so they can be used manually or wrapped by later automation.
+
 ## State Write-back Tool
 
 TeamBrain now exposes a tool named `teambrain-state`.
@@ -147,6 +170,39 @@ Example payloads:
   "action": "upsert_todo",
   "text": "修复下午 6 点崩溃",
   "done": true
+}
+```
+
+## Long-term Memory Tools
+
+TeamBrain now also exposes:
+
+- `teambrain-profile`
+- `teambrain-rules`
+
+Recommended usage:
+
+- use `teambrain-profile` for L1 agent long-term profile updates
+- use `teambrain-rules` for L4 team-wide long-term rules
+- do not write temporary debugging notes or project-local noise into these files
+
+Example payloads:
+
+```json
+{
+  "action": "upsert_section",
+  "agentId": "coder",
+  "section": "擅长",
+  "items": ["C#", "Lua"],
+  "mode": "append"
+}
+```
+
+```json
+{
+  "action": "upsert_rule",
+  "ruleId": "exception-handling",
+  "text": "所有新代码必须包含异常处理。"
 }
 ```
 
@@ -181,6 +237,19 @@ You can now also:
 - define a completely new role with `rolePolicies`
 
 This keeps TeamBrain generic while letting each team customize protocol text without patching plugin source code.
+
+## Current Non-Goals
+
+At the current stabilization stage, TeamBrain intentionally does **not** try to solve everything.
+
+Not in scope right now:
+
+- vector retrieval / embeddings / RAG
+- automatic multi-agent orchestration
+- a dedicated graphical admin UI
+- free-form rich state documents with arbitrary merge semantics
+
+The current focus is a stable external-brain plugin with clear boundaries, controlled write-back, and predictable prompt budgets.
 
 ## Token Strategy
 

@@ -13,6 +13,7 @@
 - V2 已增加紧凑写回协议注入，并支持运行时 `tokenBudget` 限流
 - V3 已增加角色化写回协议和共享状态目录锁
 - V4 已支持角色映射和角色协议策略配置化
+- Task 1 已补齐本地初始化、项目切换和健康检查命令入口
 - GitHub 社区治理、CI、发布和维护者流程底座已补齐
 
 ## 为什么要用 TeamBrain
@@ -121,6 +122,28 @@ npm test
 npm run typecheck
 ```
 
+## 本地管理命令
+
+初始化一个最小 TeamBrain：
+
+```bash
+npm run teambrain:init -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+```
+
+切换或补齐某个项目目录：
+
+```bash
+npm run teambrain:switch -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+```
+
+检查当前 TeamBrain 健康状态：
+
+```bash
+npm run teambrain:health -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+```
+
+这些命令会输出结构化 JSON，既可以手工使用，也方便后续被自动化脚本封装。
+
 ## 状态写回工具
 
 TeamBrain 现在提供一个 `teambrain-state` 工具。
@@ -147,6 +170,39 @@ TeamBrain 现在提供一个 `teambrain-state` 工具。
   "action": "upsert_todo",
   "text": "修复下午 6 点崩溃",
   "done": true
+}
+```
+
+## 长期记忆工具
+
+TeamBrain 现在还提供：
+
+- `teambrain-profile`
+- `teambrain-rules`
+
+推荐用法：
+
+- `teambrain-profile` 用于更新 L1 队员长期个人档案
+- `teambrain-rules` 用于更新 L4 团队长期规则
+- 不要把临时调试笔记或项目局部噪声写进这些长期记忆文件
+
+示例参数：
+
+```json
+{
+  "action": "upsert_section",
+  "agentId": "coder",
+  "section": "擅长",
+  "items": ["C#", "Lua"],
+  "mode": "append"
+}
+```
+
+```json
+{
+  "action": "upsert_rule",
+  "ruleId": "exception-handling",
+  "text": "所有新代码必须包含异常处理。"
 }
 ```
 
@@ -181,6 +237,19 @@ TeamBrain 现在又增加了两层稳定性保护：
 - 通过 `rolePolicies` 定义全新的角色
 
 这样 TeamBrain 仍然保持通用插件形态，但每个团队都可以不用改源码，直接按自己的组织结构定制协作协议。
+
+## 当前非目标
+
+在当前“稳定化阶段”，TeamBrain **故意不试图一次解决所有问题**。
+
+当前明确不做：
+
+- 向量检索 / Embedding / RAG
+- 自动多 Agent 编排
+- 独立图形化管理 UI
+- 具备任意合并语义的自由格式复杂状态文档
+
+当前最重要的目标仍然是：把外部大脑插件的边界、受控写回和 prompt 预算机制先做稳。
 
 ## Token 策略
 
