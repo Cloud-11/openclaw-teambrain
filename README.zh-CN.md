@@ -12,6 +12,7 @@
 - 已提供 `teambrain-state` 工具，可写回 `PROJECT_STATE.md` 和 `TODO.md`
 - V2 已增加紧凑写回协议注入，并支持运行时 `tokenBudget` 限流
 - V3 已增加角色化写回协议和共享状态目录锁
+- V4 已支持角色映射和角色协议策略配置化
 - GitHub 社区治理、CI、发布和维护者流程底座已补齐
 
 ## 为什么要用 TeamBrain
@@ -90,6 +91,20 @@ V1 当前支持的上下文来源：
             "maxTotalChars": 12000,
             "maxWorkspaceFiles": 3,
             "maxWorkspaceFileChars": 1200
+          },
+          "agentMappings": {
+            "roles": {
+              "planner_agent": "planner"
+            }
+          },
+          "rolePolicies": {
+            "planner": {
+              "label": "Planner",
+              "writebackGuidance": [
+                "Planner 负责拆解项目阶段和里程碑。",
+                "Planner 优先统一维护 PROJECT_STATE.md。"
+              ]
+            }
           }
         }
       }
@@ -154,6 +169,18 @@ TeamBrain 现在又增加了两层稳定性保护：
 - 在修改 `PROJECT_STATE.md` 和 `TODO.md` 之前先获取共享状态目录锁
 
 这意味着多个 Agent 几乎同时完成任务时，写回会在项目白板层面串行化，明显降低互相覆盖共享状态的概率。
+
+## V4 可配置角色
+
+内置的 `main`、`coder`、`writer`、`qa` 角色仍然开箱即用。
+
+现在你还可以：
+
+- 通过 `agentMappings.roles` 把任意 agent id 映射到某个角色
+- 覆盖内置角色的协议策略
+- 通过 `rolePolicies` 定义全新的角色
+
+这样 TeamBrain 仍然保持通用插件形态，但每个团队都可以不用改源码，直接按自己的组织结构定制协作协议。
 
 ## Token 策略
 

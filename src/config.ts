@@ -17,9 +17,15 @@ export type TeamBrainPromptBudget = {
   maxWorkspaceFileChars: number;
 };
 
+export type TeamBrainRolePolicy = {
+  label?: string;
+  writebackGuidance: string[];
+};
+
 export type TeamBrainAgentMappings = {
   profiles: Record<string, string>;
   workspaces: Record<string, string>;
+  roles: Record<string, string>;
 };
 
 export type TeamBrainConfig = {
@@ -29,6 +35,7 @@ export type TeamBrainConfig = {
   layers: TeamBrainLayers;
   promptBudget: TeamBrainPromptBudget;
   agentMappings: TeamBrainAgentMappings;
+  rolePolicies: Record<string, TeamBrainRolePolicy>;
 };
 
 type ResolvePath = (input: string) => string;
@@ -47,6 +54,35 @@ const DEFAULT_PROMPT_BUDGET: TeamBrainPromptBudget = {
   maxTotalChars: 12000,
   maxWorkspaceFiles: 3,
   maxWorkspaceFileChars: 1200,
+};
+
+const DEFAULT_ROLE_POLICIES: Record<string, TeamBrainRolePolicy> = {
+  main: {
+    label: "Main",
+    writebackGuidance: [
+      "Main 负责汇总项目阶段、任务分派和最近更新。",
+      "Main 在任务重排或阶段切换后，优先统一更新 PROJECT_STATE.md。",
+    ],
+  },
+  coder: {
+    label: "Coder",
+    writebackGuidance: [
+      "Coder 在实现完成、阻塞变化或接手新任务时，同步活跃任务和 TODO。",
+      "Coder 不把长篇调试过程写入共享白板，只写结果与下一步。",
+    ],
+  },
+  writer: {
+    label: "Writer",
+    writebackGuidance: [
+      "Writer 在文档完成或需求变更后，同步相关 TODO 状态和简短摘要。",
+    ],
+  },
+  qa: {
+    label: "QA",
+    writebackGuidance: [
+      "QA 在验证通过、复现失败或发现阻塞时，同步测试结论和风险摘要。",
+    ],
+  },
 };
 
 function toRecord(value: unknown): Record<string, unknown> {
@@ -83,6 +119,69 @@ function readStringMap(value: unknown): Record<string, string> {
   return result;
 }
 
+function readStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((entry) => typeof entry === "string")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function readRolePolicies(value: unknown): Record<string, TeamBrainRolePolicy> {
+  const record = toRecord(value);
+  const result: Record<string, TeamBrainRolePolicy> = {};
+
+  for (const [roleId, rawPolicy] of Object.entries(record)) {
+    const policyRecord = toRecord(rawPolicy);
+    const label =
+      typeof policyRecord.label === "string" && policyRecord.label.trim() !== ""
+        ? policyRecord.label.trim()
+        : undefined;
+    const writebackGuidance = readStringArray(policyRecord.writebackGuidance);
+
+    if (!label && writebackGuidance.length === 0) {
+      continue;
+    }
+
+    result[roleId] = {
+      label,
+      writebackGuidance,
+    };
+  }
+
+  return result;
+}
+
+function mergeRolePolicies(
+  defaults: Record<string, TeamBrainRolePolicy>,
+  overrides: Record<string, TeamBrainRolePolicy>,
+): Record<string, TeamBrainRolePolicy> {
+  const result: Record<string, TeamBrainRolePolicy> = {};
+
+  for (const [roleId, policy] of Object.entries(defaults)) {
+    result[roleId] = {
+      label: policy.label,
+      writebackGuidance: [...policy.writebackGuidance],
+    };
+  }
+
+  for (const [roleId, policy] of Object.entries(overrides)) {
+    const existing = result[roleId];
+    result[roleId] = {
+      label: policy.label ?? existing?.label ?? roleId,
+      writebackGuidance:
+        policy.writebackGuidance.length > 0
+          ? [...policy.writebackGuidance]
+          : [...(existing?.writebackGuidance ?? [])],
+    };
+  }
+
+  return result;
+}
+
 function normalizePathForConfig(value: string, resolvePath?: ResolvePath): string {
   const trimmed = value.trim();
   if (trimmed.startsWith("~")) {
@@ -108,6 +207,10 @@ export function normalizeTeamBrainConfig(
   const layerRecord = toRecord(record.layers);
   const budgetRecord = toRecord(record.promptBudget);
   const mappingRecord = toRecord(record.agentMappings);
+  const rolePolicies = mergeRolePolicies(
+    DEFAULT_ROLE_POLICIES,
+    readRolePolicies(record.rolePolicies),
+  );
 
   return {
     brainRoot: normalizePathForConfig(requireNonEmptyString(record.brainRoot, "brainRoot"), resolvePath),
@@ -162,6 +265,8 @@ export function normalizeTeamBrainConfig(
     agentMappings: {
       profiles: readStringMap(mappingRecord.profiles),
       workspaces: readStringMap(mappingRecord.workspaces),
+      roles: readStringMap(mappingRecord.roles),
     },
+    rolePolicies,
   };
 }

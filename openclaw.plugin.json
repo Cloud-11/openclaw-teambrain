@@ -24,6 +24,16 @@
       "label": "加载个人项目草稿",
       "advanced": true
     },
+    "agentMappings.roles": {
+      "label": "Agent 角色映射",
+      "help": "将具体 agent id 映射到某个协议角色，如 planner_agent -> planner",
+      "advanced": true
+    },
+    "rolePolicies": {
+      "label": "角色协议策略",
+      "help": "按角色定义标签与写回指导语，可覆盖内置角色或新增角色",
+      "advanced": true
+    },
     "promptBudget.maxTotalChars": {
       "label": "总字符预算",
       "advanced": true
@@ -102,6 +112,30 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
+            }
+          },
+          "roles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "rolePolicies": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "writebackGuidance": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         }

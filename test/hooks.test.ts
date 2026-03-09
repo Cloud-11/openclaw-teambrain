@@ -95,4 +95,38 @@ describe("buildAgentPromptAddition", () => {
     expect(coderPrompt).toContain("Coder 在实现完成、阻塞变化");
     expect(coderPrompt).not.toContain("Main 负责汇总项目阶段");
   });
+
+  it("会按配置映射注入自定义角色协议", async () => {
+    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-custom-role-"));
+    tempDirs.push(root);
+
+    const config = normalizeTeamBrainConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+      agentMappings: {
+        roles: {
+          planner_agent: "planner",
+        },
+      },
+      rolePolicies: {
+        planner: {
+          label: "Planner",
+          writebackGuidance: [
+            "Planner 负责拆解项目阶段和里程碑。",
+            "Planner 优先统一维护 PROJECT_STATE.md。",
+          ],
+        },
+      },
+    });
+
+    const prompt = await buildAgentPromptAddition({
+      config,
+      agentId: "planner_agent",
+    });
+
+    expect(prompt).toContain("Planner 仅在任务状态真实变化时调用");
+    expect(prompt).toContain("Planner 负责拆解项目阶段和里程碑。");
+    expect(prompt).toContain("Planner 优先统一维护 PROJECT_STATE.md。");
+  });
 });

@@ -12,6 +12,7 @@
 - A `teambrain-state` tool can now write back `PROJECT_STATE.md` and `TODO.md`
 - V2 now injects a compact write-back protocol for agents and respects runtime `tokenBudget`
 - V3 adds role-aware write-back guidance and state-directory locking
+- V4 makes role mapping and role protocol policies configurable
 - GitHub community, CI, release, and maintainer foundations are included
 
 ## Why TeamBrain
@@ -90,6 +91,20 @@ Current V1 context sources:
             "maxTotalChars": 12000,
             "maxWorkspaceFiles": 3,
             "maxWorkspaceFileChars": 1200
+          },
+          "agentMappings": {
+            "roles": {
+              "planner_agent": "planner"
+            }
+          },
+          "rolePolicies": {
+            "planner": {
+              "label": "Planner",
+              "writebackGuidance": [
+                "Planner 负责拆解项目阶段和里程碑。",
+                "Planner 优先统一维护 PROJECT_STATE.md。"
+              ]
+            }
           }
         }
       }
@@ -154,6 +169,18 @@ TeamBrain now adds two stability guards for multi-agent collaboration:
 - a shared state-directory lock before mutating `PROJECT_STATE.md` or `TODO.md`
 
 This means concurrent agent write-backs are serialized at the project state layer, reducing accidental overwrites when several agents finish work around the same time.
+
+## V4 Configurable Roles
+
+Built-in roles such as `main`, `coder`, `writer`, and `qa` still work out of the box.
+
+You can now also:
+
+- map any agent id to a role with `agentMappings.roles`
+- override a built-in role policy
+- define a completely new role with `rolePolicies`
+
+This keeps TeamBrain generic while letting each team customize protocol text without patching plugin source code.
 
 ## Token Strategy
 

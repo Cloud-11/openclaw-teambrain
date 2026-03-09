@@ -9,7 +9,7 @@ export async function buildAgentPromptAddition(params: {
   const sections = await loadAgentSections(params.config, params.agentId);
 
   if (params.agentId) {
-    sections.push(buildWritebackProtocolSection(params.agentId));
+    sections.push(buildWritebackProtocolSection(params.config, params.agentId));
   }
 
   return renderPromptSections("TeamBrain Agent 上下文", sections, params.config);
