@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: mailto:mhbjxin@gmail.com
+    about: Please use private disclosure for security vulnerabilities
+  - name: Project documentation
+    url: https://github.com/cloud-11/openclaw-teambrain/blob/main/README.md
+    about: Read the project overview and setup guide before opening an issue

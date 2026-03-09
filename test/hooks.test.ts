@@ -1,0 +1,52 @@
+import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { normalizeTeamBrainConfig } from "../src/config.ts";
+import { buildAgentPromptAddition } from "../src/hooks.ts";
+
+async function writeUtf8(filePath: string, content: string): Promise<void> {
+  await mkdir(join(filePath, ".."), { recursive: true });
+  await writeFile(filePath, content, "utf8");
+}
+
+describe("buildAgentPromptAddition", () => {
+  const tempDirs: string[] = [];
+
+  afterEach(async () => {
+    const { rm } = await import("node:fs/promises");
+    await Promise.all(tempDirs.map((dir) => rm(dir, { recursive: true, force: true })));
+    tempDirs.length = 0;
+  });
+
+  it("会根据 agentId 注入个人档案和项目草稿", async () => {
+    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-"));
+    tempDirs.push(root);
+
+    await writeUtf8(
+      join(root, "my-dev-team/config/profiles/coder.profile.md"),
+      "# Coder 档案\n擅长 C# 和 Lua",
+    );
+    await writeUtf8(
+      join(root, "my-dev-team/projects/stardew-mod/agents_workspace/coder/notes.md"),
+      "下午 6 点重置逻辑要小心",
+    );
+
+    const config = normalizeTeamBrainConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+      layers: {
+        includePrivateWorkspace: true,
+      },
+    });
+
+    const result = await buildAgentPromptAddition({
+      config,
+      agentId: "coder",
+    });
+
+    expect(result).toContain("擅长 C# 和 Lua");
+    expect(result).toContain("下午 6 点重置逻辑要小心");
+  });
+});

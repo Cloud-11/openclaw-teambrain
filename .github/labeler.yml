@@ -1,0 +1,36 @@
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "README.md"
+          - "README.zh-CN.md"
+          - "CHANGELOG.md"
+          - "CONTRIBUTING*.md"
+          - "SECURITY*.md"
+          - "SUPPORT.md"
+          - "docs/**"
+
+github:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "test/**"
+          - "**/*.test.ts"
+
+plugin-core:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "index.ts"
+          - "src/**"
+          - "openclaw.plugin.json"
+
+release:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "package-lock.json"
+          - ".github/workflows/release.yml"
+          - ".github/release-drafter.yml"
