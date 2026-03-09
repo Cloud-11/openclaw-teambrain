@@ -11,6 +11,7 @@
 - Agent-specific context is appended through a lightweight prompt hook
 - A `teambrain-state` tool can now write back `PROJECT_STATE.md` and `TODO.md`
 - V2 now injects a compact write-back protocol for agents and respects runtime `tokenBudget`
+- V3 adds role-aware write-back guidance and state-directory locking
 - GitHub community, CI, release, and maintainer foundations are included
 
 ## Why TeamBrain
@@ -28,6 +29,7 @@ TeamBrain uses a hybrid runtime model:
 - **Per-agent context** through `before_prompt_build`
 - **Prompt budgets** to cap each section and the total injected text
 - **Runtime budget clamp** so `assemble(tokenBudget)` can shrink injected context on demand
+- **Locked write-back** so concurrent agents do not stomp shared state files
 - **Graceful degradation** when optional files are missing
 
 Current V1 context sources:
@@ -143,6 +145,15 @@ Each agent now receives a compact write-back protocol through `before_prompt_bui
 - Let `set_project_state` carry stage, active tasks, and a short summary together
 
 This keeps cross-agent coordination explicit without repeatedly stuffing long operational rules into every conversation turn.
+
+## V3 Stability
+
+TeamBrain now adds two stability guards for multi-agent collaboration:
+
+- role-aware protocol text for `main`, `coder`, `writer`, and `qa`
+- a shared state-directory lock before mutating `PROJECT_STATE.md` or `TODO.md`
+
+This means concurrent agent write-backs are serialized at the project state layer, reducing accidental overwrites when several agents finish work around the same time.
 
 ## Token Strategy
 

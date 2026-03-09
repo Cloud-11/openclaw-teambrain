@@ -70,4 +70,29 @@ describe("buildAgentPromptAddition", () => {
     expect(result).toContain("upsert_todo");
     expect(result).toContain("仅在任务状态真实变化时调用");
   });
+
+  it("会按角色注入不同的写回职责提示", async () => {
+    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-role-"));
+    tempDirs.push(root);
+
+    const config = normalizeTeamBrainConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+    });
+
+    const mainPrompt = await buildAgentPromptAddition({
+      config,
+      agentId: "main",
+    });
+    const coderPrompt = await buildAgentPromptAddition({
+      config,
+      agentId: "coder",
+    });
+
+    expect(mainPrompt).toContain("Main 负责汇总项目阶段");
+    expect(mainPrompt).toContain("优先统一更新 PROJECT_STATE.md");
+    expect(coderPrompt).toContain("Coder 在实现完成、阻塞变化");
+    expect(coderPrompt).not.toContain("Main 负责汇总项目阶段");
+  });
 });

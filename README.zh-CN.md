@@ -11,6 +11,7 @@
 - Agent 私有上下文通过轻量 prompt hook 挂载
 - 已提供 `teambrain-state` 工具，可写回 `PROJECT_STATE.md` 和 `TODO.md`
 - V2 已增加紧凑写回协议注入，并支持运行时 `tokenBudget` 限流
+- V3 已增加角色化写回协议和共享状态目录锁
 - GitHub 社区治理、CI、发布和维护者流程底座已补齐
 
 ## 为什么要用 TeamBrain
@@ -28,6 +29,7 @@ TeamBrain 采用混合运行时设计：
 - **个人上下文**：通过 `before_prompt_build`
 - **预算控制**：限制单节和总注入字符数
 - **运行时预算收紧**：`assemble(tokenBudget)` 可进一步压缩共享上下文
+- **加锁写回**：多个 Agent 并发更新时，避免共享状态文件互相覆盖
 - **优雅降级**：缺少可选文件时不报致命错误
 
 V1 当前支持的上下文来源：
@@ -143,6 +145,15 @@ TeamBrain 现在提供一个 `teambrain-state` 工具。
 - 尽量用一次 `set_project_state` 同时携带阶段、活跃任务和最近更新
 
 这样可以把多 Agent 协作协议稳定地挂进系统提示里，同时避免每轮对话重复塞入冗长规则。
+
+## V3 稳定性增强
+
+TeamBrain 现在又增加了两层稳定性保护：
+
+- 针对 `main`、`coder`、`writer`、`qa` 的角色化写回职责提示
+- 在修改 `PROJECT_STATE.md` 和 `TODO.md` 之前先获取共享状态目录锁
+
+这意味着多个 Agent 几乎同时完成任务时，写回会在项目白板层面串行化，明显降低互相覆盖共享状态的概率。
 
 ## Token 策略
 

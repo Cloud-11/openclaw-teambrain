@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { PluginTool } from "openclaw/plugin-sdk/core";
 import type { TeamBrainConfig } from "./config.ts";
+import { withDirectoryLock } from "./file-lock.ts";
 import { readOptionalUtf8 } from "./files.ts";
 
 type ProjectStateSnapshot = {
@@ -27,6 +28,10 @@ function getProjectStatePath(config: TeamBrainConfig): string {
 
 function getTodoPath(config: TeamBrainConfig): string {
   return join(getStateDir(config), "TODO.md");
+}
+
+function getLockDir(config: TeamBrainConfig): string {
+  return join(getStateDir(config), ".teambrain.lock");
 }
 
 function readString(params: Record<string, unknown>, key: string): string | undefined {
@@ -227,21 +232,24 @@ export function createTeamBrainWritebackTool(config: TeamBrainConfig): PluginToo
     },
     async execute(_id: string, params: Record<string, unknown>) {
       const action = requireAction(params);
+      await ensureStateDir(config);
 
-      if (action === "set_project_state") {
-        const result = await writeProjectState(config, params);
+      return withDirectoryLock(getLockDir(config), async () => {
+        if (action === "set_project_state") {
+          const result = await writeProjectState(config, params);
+          return toolResult(`已更新 ${result.filePath}`, {
+            action,
+            filePath: result.filePath,
+            snapshot: result.snapshot,
+          });
+        }
+
+        const result = await writeTodo(config, params);
         return toolResult(`已更新 ${result.filePath}`, {
           action,
           filePath: result.filePath,
-          snapshot: result.snapshot,
+          items: result.items,
         });
-      }
-
-      const result = await writeTodo(config, params);
-      return toolResult(`已更新 ${result.filePath}`, {
-        action,
-        filePath: result.filePath,
-        items: result.items,
       });
     },
   };

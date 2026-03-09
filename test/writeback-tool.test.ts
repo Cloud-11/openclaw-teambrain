@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -101,5 +101,39 @@ describe("createTeamBrainWritebackTool", () => {
     const content = await readFile(join(root, "my-dev-team/projects/stardew-mod/state/TODO.md"), "utf8");
     expect(content).not.toContain("修复下午 6 点崩溃");
     expect(content).toContain("补文档");
+  });
+
+  it("遇到锁文件时会等待后再写入，避免并发覆盖", async () => {
+    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-lock-"));
+    tempDirs.push(root);
+
+    const config = normalizeTeamBrainConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+    });
+
+    const stateDir = join(root, "my-dev-team/projects/stardew-mod/state");
+    const lockDir = join(stateDir, ".teambrain.lock");
+    await mkdir(lockDir, { recursive: true });
+
+    const tool = createTeamBrainWritebackTool(config);
+    const startedAt = Date.now();
+
+    setTimeout(() => {
+      void rm(lockDir, { recursive: true, force: true });
+    }, 120);
+
+    await tool.execute("call-5", {
+      action: "upsert_todo",
+      text: "等待锁释放后写入",
+      done: false,
+    });
+
+    const elapsed = Date.now() - startedAt;
+    const content = await readFile(join(stateDir, "TODO.md"), "utf8");
+
+    expect(elapsed).toBeGreaterThanOrEqual(80);
+    expect(content).toContain("等待锁释放后写入");
   });
 });
