@@ -1,0 +1,116 @@
+{
+  "id": "teambrain",
+  "name": "OpenClaw TeamBrain",
+  "description": "将团队规则、项目白板和 Agent 私有记忆从代码仓库外部装配到 OpenClaw 上下文中",
+  "version": "0.1.0",
+  "kind": "context-engine",
+  "uiHints": {
+    "brainRoot": {
+      "label": "大脑根目录",
+      "help": "团队大脑的根目录，可使用绝对路径、相对路径或 ~"
+    },
+    "teamId": {
+      "label": "团队 ID",
+      "help": "对应 ~/.openclaw/brains 下的团队目录名"
+    },
+    "projectId": {
+      "label": "项目 ID",
+      "help": "当前要挂载的项目标识"
+    },
+    "layers.includeProfiles": {
+      "label": "加载个人档案"
+    },
+    "layers.includePrivateWorkspace": {
+      "label": "加载个人项目草稿",
+      "advanced": true
+    },
+    "promptBudget.maxTotalChars": {
+      "label": "总字符预算",
+      "advanced": true
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "brainRoot": {
+        "type": "string"
+      },
+      "teamId": {
+        "type": "string"
+      },
+      "projectId": {
+        "type": "string"
+      },
+      "layers": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "includeTeamCharter": {
+            "type": "boolean"
+          },
+          "includeGlobalRules": {
+            "type": "boolean"
+          },
+          "includeProfiles": {
+            "type": "boolean"
+          },
+          "includeProjectState": {
+            "type": "boolean"
+          },
+          "includeTodo": {
+            "type": "boolean"
+          },
+          "includePrivateWorkspace": {
+            "type": "boolean"
+          }
+        }
+      },
+      "promptBudget": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "maxCharsPerSection": {
+            "type": "number",
+            "minimum": 200
+          },
+          "maxTotalChars": {
+            "type": "number",
+            "minimum": 1000
+          },
+          "maxWorkspaceFiles": {
+            "type": "number",
+            "minimum": 1
+          },
+          "maxWorkspaceFileChars": {
+            "type": "number",
+            "minimum": 200
+          }
+        }
+      },
+      "agentMappings": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profiles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "workspaces": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "brainRoot",
+      "teamId",
+      "projectId"
+    ]
+  }
+}

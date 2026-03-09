@@ -1,0 +1,41 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+categories:
+  - title: "🚀 Features"
+    labels:
+      - enhancement
+      - plugin-core
+  - title: "🧪 Tests"
+    labels:
+      - tests
+  - title: "📚 Documentation"
+    labels:
+      - documentation
+  - title: "⚙️ GitHub & Release"
+    labels:
+      - github
+      - release
+
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+version-resolver:
+  major:
+    labels:
+      - breaking
+  minor:
+    labels:
+      - enhancement
+  patch:
+    labels:
+      - bug
+      - documentation
+      - github
+      - plugin-core
+      - release
+      - tests
+  default: patch
+autolabeler: []

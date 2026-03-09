@@ -1,0 +1,7 @@
+node_modules/
+coverage/
+.turbo/
+.DS_Store
+dist/
+docs/
+*.tgz
