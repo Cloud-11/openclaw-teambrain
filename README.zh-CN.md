@@ -10,6 +10,7 @@
 - 共享上下文通过 `context-engine` 装配
 - Agent 私有上下文通过轻量 prompt hook 挂载
 - 已提供 `teambrain-state` 工具，可写回 `PROJECT_STATE.md` 和 `TODO.md`
+- V2 已增加紧凑写回协议注入，并支持运行时 `tokenBudget` 限流
 - GitHub 社区治理、CI、发布和维护者流程底座已补齐
 
 ## 为什么要用 TeamBrain
@@ -26,6 +27,7 @@ TeamBrain 采用混合运行时设计：
 - **共享上下文**：通过 `context-engine` 的 `assemble()`
 - **个人上下文**：通过 `before_prompt_build`
 - **预算控制**：限制单节和总注入字符数
+- **运行时预算收紧**：`assemble(tokenBudget)` 可进一步压缩共享上下文
 - **优雅降级**：缺少可选文件时不报致命错误
 
 V1 当前支持的上下文来源：
@@ -130,6 +132,26 @@ TeamBrain 现在提供一个 `teambrain-state` 工具。
   "done": true
 }
 ```
+
+## V2 协作流
+
+现在每个 Agent 都会通过 `before_prompt_build` 收到一段紧凑的写回协议。
+
+- 只有在项目状态真的变化时才调用 `teambrain-state`
+- 优先一次合并写回，而不是拆成很多小调用
+- 共享白板只写短摘要，长草稿继续放在私有工作区
+- 尽量用一次 `set_project_state` 同时携带阶段、活跃任务和最近更新
+
+这样可以把多 Agent 协作协议稳定地挂进系统提示里，同时避免每轮对话重复塞入冗长规则。
+
+## Token 策略
+
+TeamBrain 现在有两层预算：
+
+- 插件静态预算：`promptBudget.maxTotalChars`
+- 运行时动态预算：`assemble({ tokenBudget })`
+
+最终共享上下文会取两者中更小的那个限制，这样在小模型或更紧的编排预算下也能更稳地运行。
 
 ## GitHub 运维底座
 

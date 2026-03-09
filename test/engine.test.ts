@@ -76,4 +76,38 @@ describe("createTeamBrainContextEngine", () => {
     expect(result.estimatedTokens).toBe(0);
     expect(result.systemPromptAddition).toBeUndefined();
   });
+
+  it("会根据 assemble 的 tokenBudget 收紧最终上下文大小", async () => {
+    const root = await mkdtemp(join(tmpdir(), "teambrain-engine-budget-"));
+    tempDirs.push(root);
+
+    await writeUtf8(
+      join(root, "my-dev-team/config/team-charter.md"),
+      `# 团队宪法\n${"必须写测试并同步状态。".repeat(80)}`,
+    );
+    await writeUtf8(
+      join(root, "my-dev-team/memory_global/global_rules.md"),
+      `# 全局规则\n${"禁止高危命令并保持任务同步。".repeat(80)}`,
+    );
+
+    const config = normalizeTeamBrainConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "budget-project",
+      promptBudget: {
+        maxTotalChars: 8000,
+      },
+    });
+
+    const engine = createTeamBrainContextEngine(config);
+    const result = await engine.assemble({
+      sessionId: "session-budget",
+      messages: [],
+      tokenBudget: 80,
+    });
+
+    expect(result.systemPromptAddition).toBeDefined();
+    expect(result.estimatedTokens).toBeLessThanOrEqual(80);
+    expect(result.systemPromptAddition!.length).toBeLessThanOrEqual(320);
+  });
 });

@@ -188,13 +188,17 @@ export function renderPromptSections(
   heading: string,
   sections: PromptSection[],
   config: TeamBrainConfig,
+  options?: {
+    maxTotalChars?: number;
+  },
 ): string | undefined {
   if (sections.length === 0) {
     return undefined;
   }
 
   const blocks: string[] = [`# ${heading}`];
-  let remaining = config.promptBudget.maxTotalChars - blocks[0].length - 2;
+  const maxTotalChars = options?.maxTotalChars ?? config.promptBudget.maxTotalChars;
+  let remaining = maxTotalChars - blocks[0].length - 2;
 
   for (const section of sections) {
     if (remaining <= 0) {

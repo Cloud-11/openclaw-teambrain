@@ -10,6 +10,7 @@
 - Shared context is mounted through a `context-engine`
 - Agent-specific context is appended through a lightweight prompt hook
 - A `teambrain-state` tool can now write back `PROJECT_STATE.md` and `TODO.md`
+- V2 now injects a compact write-back protocol for agents and respects runtime `tokenBudget`
 - GitHub community, CI, release, and maintainer foundations are included
 
 ## Why TeamBrain
@@ -26,6 +27,7 @@ TeamBrain uses a hybrid runtime model:
 - **Shared context** through `assemble()` in the `context-engine`
 - **Per-agent context** through `before_prompt_build`
 - **Prompt budgets** to cap each section and the total injected text
+- **Runtime budget clamp** so `assemble(tokenBudget)` can shrink injected context on demand
 - **Graceful degradation** when optional files are missing
 
 Current V1 context sources:
@@ -130,6 +132,26 @@ Example payloads:
   "done": true
 }
 ```
+
+## V2 Collaboration Flow
+
+Each agent now receives a compact write-back protocol through `before_prompt_build`.
+
+- Use `teambrain-state` only when project state really changes
+- Prefer one merged write-back instead of many tiny calls
+- Keep shared board updates short; leave long drafts in private workspace files
+- Let `set_project_state` carry stage, active tasks, and a short summary together
+
+This keeps cross-agent coordination explicit without repeatedly stuffing long operational rules into every conversation turn.
+
+## Token Strategy
+
+TeamBrain uses two budget layers:
+
+- static plugin budget from `promptBudget.maxTotalChars`
+- runtime clamp from `assemble({ tokenBudget })`
+
+The effective shared-context size is the lower of those two limits. This makes the plugin safer to use with smaller models or tighter orchestration budgets.
 
 ## GitHub Operations
 
