@@ -1,4 +1,17 @@
 declare module "openclaw/plugin-sdk/core" {
+  export type PluginToolResult = {
+    content: Array<{ type: string; text: string }>;
+    details?: unknown;
+  };
+
+  export type PluginTool = {
+    name: string;
+    label: string;
+    description: string;
+    parameters: Record<string, unknown>;
+    execute: (id: string, params: Record<string, unknown>) => Promise<PluginToolResult>;
+  };
+
   export type OpenClawPluginApi = {
     config: {
       plugins?: {
@@ -10,6 +23,7 @@ declare module "openclaw/plugin-sdk/core" {
     pluginConfig?: Record<string, unknown>;
     resolvePath: (input: string) => string;
     registerContextEngine: (id: string, factory: () => unknown) => void;
+    registerTool: (tool: PluginTool, opts?: { optional?: boolean; name?: string }) => void;
     on: (
       hookName: "before_prompt_build",
       handler: (

@@ -2,6 +2,7 @@ import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
 import { normalizeTeamBrainConfig } from "./src/config.ts";
 import { createTeamBrainContextEngine } from "./src/engine.ts";
 import { buildAgentPromptAddition } from "./src/hooks.ts";
+import { createTeamBrainWritebackTool } from "./src/writeback-tool.ts";
 
 function isTeamBrainActive(api: OpenClawPluginApi): boolean {
   return api.config.plugins?.slots?.contextEngine === "teambrain";
@@ -17,6 +18,7 @@ const plugin = {
     const config = normalizeTeamBrainConfig(api.pluginConfig ?? {}, api.resolvePath);
 
     api.registerContextEngine("teambrain", () => createTeamBrainContextEngine(config));
+    api.registerTool(createTeamBrainWritebackTool(config));
 
     api.on("before_prompt_build", async (_event, ctx) => {
       if (!isTeamBrainActive(api)) {

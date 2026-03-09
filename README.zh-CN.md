@@ -9,6 +9,7 @@
 - V1 已具备可运行的独立插件骨架
 - 共享上下文通过 `context-engine` 装配
 - Agent 私有上下文通过轻量 prompt hook 挂载
+- 已提供 `teambrain-state` 工具，可写回 `PROJECT_STATE.md` 和 `TODO.md`
 - GitHub 社区治理、CI、发布和维护者流程底座已补齐
 
 ## 为什么要用 TeamBrain
@@ -101,6 +102,35 @@ npm test
 npm run typecheck
 ```
 
+## 状态写回工具
+
+TeamBrain 现在提供一个 `teambrain-state` 工具。
+
+支持的动作：
+
+- `set_project_state`
+- `upsert_todo`
+- `remove_todo`
+
+示例参数：
+
+```json
+{
+  "action": "set_project_state",
+  "stage": "开发中",
+  "activeTasks": ["修复 18:00 崩溃", "补单元测试"],
+  "summary": "Coder 已开始排查定时逻辑"
+}
+```
+
+```json
+{
+  "action": "upsert_todo",
+  "text": "修复下午 6 点崩溃",
+  "done": true
+}
+```
+
 ## GitHub 运维底座
 
 当前仓库已经包含：
@@ -127,7 +157,6 @@ npm run typecheck
 
 ## 路线图
 
-- 增加 `PROJECT_STATE.md` 和 `TODO.md` 的写回工具
 - 增加长期检索与向量索引
 - 增加多项目切换辅助工具
 - 增加 TeamBrain 运维命令

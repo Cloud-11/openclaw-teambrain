@@ -9,6 +9,7 @@
 - V1 is available as a working standalone plugin skeleton
 - Shared context is mounted through a `context-engine`
 - Agent-specific context is appended through a lightweight prompt hook
+- A `teambrain-state` tool can now write back `PROJECT_STATE.md` and `TODO.md`
 - GitHub community, CI, release, and maintainer foundations are included
 
 ## Why TeamBrain
@@ -101,6 +102,35 @@ npm test
 npm run typecheck
 ```
 
+## State Write-back Tool
+
+TeamBrain now exposes a tool named `teambrain-state`.
+
+Supported actions:
+
+- `set_project_state`
+- `upsert_todo`
+- `remove_todo`
+
+Example payloads:
+
+```json
+{
+  "action": "set_project_state",
+  "stage": "开发中",
+  "activeTasks": ["修复 18:00 崩溃", "补单元测试"],
+  "summary": "Coder 已开始排查定时逻辑"
+}
+```
+
+```json
+{
+  "action": "upsert_todo",
+  "text": "修复下午 6 点崩溃",
+  "done": true
+}
+```
+
 ## GitHub Operations
 
 This repository now includes:
@@ -127,7 +157,6 @@ This repository now includes:
 
 ## Roadmap
 
-- write-back tools for `PROJECT_STATE.md` and `TODO.md`
 - long-term retrieval and vector indexing
 - multi-agent project switching helpers
 - optional CLI/admin commands for TeamBrain maintenance
