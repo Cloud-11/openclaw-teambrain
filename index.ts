@@ -2,6 +2,11 @@
 import { normalizeNeigeConfig } from "./src/config.ts";
 import { createNeigeContextEngine } from "./src/engine.ts";
 import { buildAgentPromptAddition } from "./src/hooks.ts";
+import {
+  createNeigeCheckpointTool,
+  createNeigeCloseoutTool,
+  createNeigeTaskTool,
+} from "./src/collaboration-tools.ts";
 import { createNeigeProfileTool, createNeigeRulesTool } from "./src/memory-tools.ts";
 import { createNeigeWritebackTool } from "./src/writeback-tool.ts";
 
@@ -22,6 +27,9 @@ const plugin = {
     api.registerTool(createNeigeWritebackTool(config));
     api.registerTool(createNeigeProfileTool(config));
     api.registerTool(createNeigeRulesTool(config));
+    api.registerTool(createNeigeTaskTool(config));
+    api.registerTool(createNeigeCheckpointTool(config));
+    api.registerTool(createNeigeCloseoutTool(config));
 
     api.on("before_prompt_build", async (_event, ctx) => {
       if (!isNeigeActive(api)) {
