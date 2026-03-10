@@ -28,7 +28,7 @@ describe("plugin register sync contract", () => {
 
     expect(result).toBeUndefined();
     expect(registerContextEngine).toHaveBeenCalledTimes(1);
-    expect(registerTool).toHaveBeenCalledTimes(9);
+    expect(registerTool).toHaveBeenCalledTimes(10);
     expect(on).toHaveBeenCalledTimes(1);
   });
 });
