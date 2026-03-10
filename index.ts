@@ -8,6 +8,11 @@ import {
   createNeigeTaskTool,
 } from "./src/collaboration-tools.ts";
 import { createNeigeProfileTool, createNeigeRulesTool } from "./src/memory-tools.ts";
+import {
+  createNeigeCandidateTool,
+  createNeigeHookPreviewTool,
+  createNeigeSkillTool,
+} from "./src/knowledge-tools.ts";
 import { createNeigeWritebackTool } from "./src/writeback-tool.ts";
 
 function isNeigeActive(api: OpenClawPluginApi): boolean {
@@ -30,6 +35,9 @@ const plugin = {
     api.registerTool(createNeigeTaskTool(config));
     api.registerTool(createNeigeCheckpointTool(config));
     api.registerTool(createNeigeCloseoutTool(config));
+    api.registerTool(createNeigeCandidateTool(config));
+    api.registerTool(createNeigeSkillTool(config));
+    api.registerTool(createNeigeHookPreviewTool(config));
 
     api.on("before_prompt_build", async (_event, ctx) => {
       if (!isNeigeActive(api)) {

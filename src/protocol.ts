@@ -37,7 +37,7 @@ export function buildWritebackProtocolSection(
   const agentLabel = normalizeAgentLabel(config, agentId);
 
   return {
-    title: "协作写回协议",
+    title: "Role Policy",
     content: [
       `- ${agentLabel} 仅在任务状态真实变化时调用 \`neige-state\`。`,
       "- 优先合并一次写回，避免连续重复更新相同状态。",
