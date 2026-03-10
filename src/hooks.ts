@@ -8,6 +8,7 @@ import {
   type PromptSection,
 } from "./files.ts";
 import { buildWritebackProtocolSection } from "./protocol.ts";
+import { buildReportingChainSection } from "./team-topology.ts";
 
 function teamRoot(config: NeigeConfig): string {
   return join(config.brainRoot, config.teamId);
@@ -116,6 +117,11 @@ export async function buildAgentPromptAddition(params: {
   const currentState = await buildCurrentStateSection(params.config);
   if (currentState) {
     sections.push(currentState);
+  }
+
+  const reportingChain = await buildReportingChainSection(params.config, params.agentId);
+  if (reportingChain) {
+    sections.push(reportingChain);
   }
 
   if (params.agentId) {

@@ -20,6 +20,8 @@ export type NeigePromptBudget = {
 export type NeigeRolePolicy = {
   label?: string;
   writebackGuidance: string[];
+  allowedTools?: string[];
+  deniedTools?: string[];
 };
 
 export type NeigeAgentMappings = {
@@ -149,6 +151,8 @@ function readRolePolicies(value: unknown): Record<string, NeigeRolePolicy> {
     result[roleId] = {
       label,
       writebackGuidance,
+      allowedTools: readStringArray(policyRecord.allowedTools),
+      deniedTools: readStringArray(policyRecord.deniedTools),
     };
   }
 
@@ -176,6 +180,14 @@ function mergeRolePolicies(
         policy.writebackGuidance.length > 0
           ? [...policy.writebackGuidance]
           : [...(existing?.writebackGuidance ?? [])],
+      allowedTools:
+        (policy.allowedTools?.length ?? 0) > 0
+          ? [...(policy.allowedTools ?? [])]
+          : [...(existing?.allowedTools ?? [])],
+      deniedTools:
+        (policy.deniedTools?.length ?? 0) > 0
+          ? [...(policy.deniedTools ?? [])]
+          : [...(existing?.deniedTools ?? [])],
     };
   }
 

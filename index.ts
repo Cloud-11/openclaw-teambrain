@@ -13,10 +13,29 @@ import {
   createNeigeHookPreviewTool,
   createNeigeSkillTool,
 } from "./src/knowledge-tools.ts";
+import { isNeigeToolAllowedForAgent } from "./src/role-enforcement.ts";
 import { createNeigeWritebackTool } from "./src/writeback-tool.ts";
 
 function isNeigeActive(api: OpenClawPluginApi): boolean {
   return api.config.plugins?.slots?.contextEngine === "neige";
+}
+
+function registerRoleScopedTool(
+  api: OpenClawPluginApi,
+  config: ReturnType<typeof normalizeNeigeConfig>,
+  toolName: string,
+  createTool: () => Parameters<OpenClawPluginApi["registerTool"]>[0] extends infer _T ? any : never,
+) {
+  api.registerTool(
+    (ctx) => {
+      if (!isNeigeToolAllowedForAgent(config, ctx.agentId, toolName)) {
+        return null;
+      }
+
+      return createTool();
+    },
+    { name: toolName },
+  );
 }
 
 const plugin = {
@@ -29,15 +48,15 @@ const plugin = {
     const config = normalizeNeigeConfig(api.pluginConfig ?? {}, api.resolvePath);
 
     api.registerContextEngine("neige", () => createNeigeContextEngine(config));
-    api.registerTool(createNeigeWritebackTool(config));
-    api.registerTool(createNeigeProfileTool(config));
-    api.registerTool(createNeigeRulesTool(config));
-    api.registerTool(createNeigeTaskTool(config));
-    api.registerTool(createNeigeCheckpointTool(config));
-    api.registerTool(createNeigeCloseoutTool(config));
-    api.registerTool(createNeigeCandidateTool(config));
-    api.registerTool(createNeigeSkillTool(config));
-    api.registerTool(createNeigeHookPreviewTool(config));
+    registerRoleScopedTool(api, config, "neige-state", () => createNeigeWritebackTool(config));
+    registerRoleScopedTool(api, config, "neige-profile", () => createNeigeProfileTool(config));
+    registerRoleScopedTool(api, config, "neige-rules", () => createNeigeRulesTool(config));
+    registerRoleScopedTool(api, config, "neige-task", () => createNeigeTaskTool(config));
+    registerRoleScopedTool(api, config, "neige-checkpoint", () => createNeigeCheckpointTool(config));
+    registerRoleScopedTool(api, config, "neige-closeout", () => createNeigeCloseoutTool(config));
+    registerRoleScopedTool(api, config, "neige-candidate", () => createNeigeCandidateTool(config));
+    registerRoleScopedTool(api, config, "neige-skill", () => createNeigeSkillTool(config));
+    registerRoleScopedTool(api, config, "neige-hook-preview", () => createNeigeHookPreviewTool(config));
 
     api.on("before_prompt_build", async (_event, ctx) => {
       if (!isNeigeActive(api)) {

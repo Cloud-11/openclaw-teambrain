@@ -201,5 +201,39 @@ describe("buildAgentPromptAddition", () => {
     expect(result).toContain("Current State");
     expect(result).not.toContain("Skill: debug-wsl");
   });
+
+  it("会注入团队拓扑中的汇报链信息", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-topology-"));
+    tempDirs.push(root);
+
+    await writeUtf8(
+      join(root, "my-dev-team/config/team-topology.json"),
+      JSON.stringify(
+        {
+          roles: {
+            main: { reportsTo: null, handoffTargets: ["coder", "qa"] },
+            coder: { reportsTo: "main", handoffTargets: ["qa"] },
+          },
+        },
+        null,
+        2,
+      ),
+    );
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    const result = await buildAgentPromptAddition({
+      config,
+      agentId: "coder",
+    });
+
+    expect(result).toContain("Reporting Chain");
+    expect(result).toContain("reportsTo: main");
+    expect(result).toContain("handoffTargets: qa");
+  });
 });
 

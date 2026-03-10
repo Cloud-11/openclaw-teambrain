@@ -1,4 +1,4 @@
-﻿import type { PluginTool } from "openclaw/plugin-sdk/core";
+import type { PluginTool, PluginToolFactory } from "openclaw/plugin-sdk/core";
 import plugin from "../../index.ts";
 
 type NeigeHarnessConfig = {
@@ -28,34 +28,43 @@ type BeforePromptBuildHandler = (
   ctx: { agentId?: string },
 ) => Promise<BeforePromptBuildResult | undefined> | BeforePromptBuildResult | undefined;
 
+type ToolRegistration = {
+  tool: PluginTool | PluginToolFactory;
+  opts?: { optional?: boolean; name?: string; names?: string[] };
+};
+
 export type NeigeRuntimeHarness = {
-  registeredTools: PluginTool[];
+  registrations: ToolRegistration[];
   contextEngine: ContextEngineLike;
   runBeforePromptBuild: (ctx: { agentId?: string }) => Promise<BeforePromptBuildResult | undefined>;
 };
 
 export async function createRegisteredNeigeHarness(
   config: NeigeHarnessConfig,
+  pluginConfigOverride?: Record<string, unknown>,
 ): Promise<NeigeRuntimeHarness> {
-  const registeredTools: PluginTool[] = [];
+  const registrations: ToolRegistration[] = [];
   let contextEngineFactory: (() => ContextEngineLike) | undefined;
   let beforePromptBuildHandler: BeforePromptBuildHandler | undefined;
 
   await plugin.register({
-      config: {
-        plugins: {
-          slots: {
-            contextEngine: "neige",
-          },
+    config: {
+      plugins: {
+        slots: {
+          contextEngine: "neige",
         },
       },
-    pluginConfig: config,
+    },
+    pluginConfig: {
+      ...config,
+      ...(pluginConfigOverride ?? {}),
+    },
     resolvePath: (input: string) => input,
     registerContextEngine: (_id, factory) => {
       contextEngineFactory = factory as () => ContextEngineLike;
     },
-    registerTool: (tool) => {
-      registeredTools.push(tool);
+    registerTool: (tool, opts) => {
+      registrations.push({ tool, opts });
     },
     on: (_hookName, handler) => {
       beforePromptBuildHandler = handler as BeforePromptBuildHandler;
@@ -71,22 +80,50 @@ export async function createRegisteredNeigeHarness(
   }
 
   return {
-    registeredTools,
+    registrations,
     contextEngine: contextEngineFactory(),
     runBeforePromptBuild: (ctx) =>
       Promise.resolve(beforePromptBuildHandler?.({ prompt: "", messages: [] }, ctx)),
   };
 }
 
+export function getResolvedTools(
+  harness: NeigeRuntimeHarness,
+  ctx: { agentId?: string } = {},
+): PluginTool[] {
+  const tools: PluginTool[] = [];
+  for (const registration of harness.registrations) {
+    const resolved =
+      typeof registration.tool === "function"
+        ? registration.tool({
+            agentId: ctx.agentId,
+          })
+        : registration.tool;
+    if (!resolved) {
+      continue;
+    }
+    const list = Array.isArray(resolved) ? resolved : [resolved];
+    tools.push(...list);
+  }
+  return tools;
+}
+
+export function getResolvedToolNames(
+  harness: NeigeRuntimeHarness,
+  ctx: { agentId?: string } = {},
+): string[] {
+  return getResolvedTools(harness, ctx).map((tool) => tool.name);
+}
+
 export function getRegisteredTool(
   harness: NeigeRuntimeHarness,
   toolName: string,
+  ctx: { agentId?: string } = {},
 ): PluginTool {
-  const tool = harness.registeredTools.find((entry) => entry.name === toolName);
+  const tool = getResolvedTools(harness, ctx).find((entry) => entry.name === toolName);
   if (!tool) {
     throw new Error(`未找到工具：${toolName}`);
   }
 
   return tool;
 }
-

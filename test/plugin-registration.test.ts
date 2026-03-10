@@ -29,7 +29,7 @@ describe("plugin register", () => {
     expect(registerContextEngine).toHaveBeenCalledTimes(1);
     expect(registerContextEngine.mock.calls[0]?.[0]).toBe("neige");
     expect(registerTool).toHaveBeenCalledTimes(9);
-    expect(registerTool.mock.calls.map((call) => call[0]?.name)).toEqual([
+    expect(registerTool.mock.calls.map((call) => call[1]?.name)).toEqual([
       "neige-state",
       "neige-profile",
       "neige-rules",
