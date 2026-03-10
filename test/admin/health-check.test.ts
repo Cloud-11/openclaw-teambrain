@@ -1,10 +1,10 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { checkTeamBrainHealth } from "../../src/admin/health-check.ts";
+import { checkNeigeHealth } from "../../src/admin/health-check.ts";
 
-describe("checkTeamBrainHealth", () => {
+describe("checkNeigeHealth", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -13,7 +13,7 @@ describe("checkTeamBrainHealth", () => {
   });
 
   it("会返回缺失目录、缺失文件和建议动作", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-health-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-health-"));
     tempDirs.push(root);
 
     await mkdir(join(root, "my-dev-team/projects/stardew-mod/state"), { recursive: true });
@@ -23,7 +23,7 @@ describe("checkTeamBrainHealth", () => {
       "utf8",
     );
 
-    const result = await checkTeamBrainHealth({
+    const result = await checkNeigeHealth({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -38,6 +38,7 @@ describe("checkTeamBrainHealth", () => {
     expect(result.missingFiles).toContain(
       join(root, "my-dev-team/projects/stardew-mod/state/TODO.md"),
     );
-    expect(result.suggestions).toContain("运行初始化工具补齐 TeamBrain 目录和模板文件。");
+    expect(result.suggestions).toContain("运行初始化工具补齐 Neige 目录和模板文件。");
   });
 });
+

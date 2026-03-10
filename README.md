@@ -1,4 +1,4 @@
-# Neige
+﻿# Neige
 
 [简体中文](./README.zh-CN.md) · English
 
@@ -25,7 +25,7 @@
 
 ## Architecture
 
-TeamBrain uses a hybrid runtime model:
+Neige uses a hybrid runtime model:
 
 - **Shared context** through `assemble()` in the `context-engine`
 - **Per-agent context** through `before_prompt_build`
@@ -293,3 +293,4 @@ This repository now includes:
 ## License
 
 MIT
+

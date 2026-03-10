@@ -1,9 +1,9 @@
-import type { TeamBrainConfig } from "./config.ts";
+﻿import type { NeigeConfig } from "./config.ts";
 import { loadAgentSections, renderPromptSections } from "./files.ts";
 import { buildWritebackProtocolSection } from "./protocol.ts";
 
 export async function buildAgentPromptAddition(params: {
-  config: TeamBrainConfig;
+  config: NeigeConfig;
   agentId?: string;
 }): Promise<string | undefined> {
   const sections = await loadAgentSections(params.config, params.agentId);
@@ -12,5 +12,6 @@ export async function buildAgentPromptAddition(params: {
     sections.push(buildWritebackProtocolSection(params.config, params.agentId));
   }
 
-  return renderPromptSections("TeamBrain Agent 上下文", sections, params.config);
+  return renderPromptSections("Neige Agent 上下文", sections, params.config);
 }
+

@@ -1,7 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
+﻿import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { PluginTool } from "openclaw/plugin-sdk/core";
-import type { TeamBrainConfig } from "./config.ts";
+import type { NeigeConfig } from "./config.ts";
 import { readOptionalUtf8 } from "./files.ts";
 
 type ProfileAction = "upsert_section";
@@ -18,15 +18,15 @@ type RuleEntry = {
   text: string;
 };
 
-function getProfilesDir(config: TeamBrainConfig): string {
+function getProfilesDir(config: NeigeConfig): string {
   return join(config.brainRoot, config.teamId, "config", "profiles");
 }
 
-function getProfilePath(config: TeamBrainConfig, agentId: string): string {
+function getProfilePath(config: NeigeConfig, agentId: string): string {
   return join(getProfilesDir(config), `${agentId}.profile.md`);
 }
 
-function getGlobalRulesPath(config: TeamBrainConfig): string {
+function getGlobalRulesPath(config: NeigeConfig): string {
   return join(config.brainRoot, config.teamId, "memory_global", "global_rules.md");
 }
 
@@ -175,7 +175,7 @@ function toolResult(text: string, details: unknown) {
   };
 }
 
-export function createTeamBrainProfileTool(config: TeamBrainConfig): PluginTool {
+export function createNeigeProfileTool(config: NeigeConfig): PluginTool {
   return {
     name: "neige-profile",
     label: "Neige Profile",
@@ -237,7 +237,7 @@ export function createTeamBrainProfileTool(config: TeamBrainConfig): PluginTool 
   };
 }
 
-export function createTeamBrainRulesTool(config: TeamBrainConfig): PluginTool {
+export function createNeigeRulesTool(config: NeigeConfig): PluginTool {
   return {
     name: "neige-rules",
     label: "Neige Rules",
@@ -287,3 +287,4 @@ export function createTeamBrainRulesTool(config: TeamBrainConfig): PluginTool {
     },
   };
 }
+

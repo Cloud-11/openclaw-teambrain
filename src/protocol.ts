@@ -1,7 +1,7 @@
-import type { TeamBrainConfig } from "./config.ts";
+﻿import type { NeigeConfig } from "./config.ts";
 import type { PromptSection } from "./files.ts";
 
-function resolveRoleId(config: TeamBrainConfig, agentId?: string): string | undefined {
+function resolveRoleId(config: NeigeConfig, agentId?: string): string | undefined {
   if (!agentId) {
     return undefined;
   }
@@ -9,7 +9,7 @@ function resolveRoleId(config: TeamBrainConfig, agentId?: string): string | unde
   return config.agentMappings.roles[agentId] ?? agentId;
 }
 
-function normalizeAgentLabel(config: TeamBrainConfig, agentId?: string): string {
+function normalizeAgentLabel(config: NeigeConfig, agentId?: string): string {
   const roleId = resolveRoleId(config, agentId);
   return config.rolePolicies[roleId ?? ""]?.label ?? agentId ?? "当前 Agent";
 }
@@ -19,7 +19,7 @@ function normalizeGuidanceLine(line: string): string {
   return trimmed.startsWith("- ") ? trimmed : `- ${trimmed}`;
 }
 
-function buildRoleLines(config: TeamBrainConfig, agentLabel: string, agentId?: string): string[] {
+function buildRoleLines(config: NeigeConfig, agentLabel: string, agentId?: string): string[] {
   const roleId = resolveRoleId(config, agentId);
   const policy = roleId ? config.rolePolicies[roleId] : undefined;
 
@@ -31,7 +31,7 @@ function buildRoleLines(config: TeamBrainConfig, agentLabel: string, agentId?: s
 }
 
 export function buildWritebackProtocolSection(
-  config: TeamBrainConfig,
+  config: NeigeConfig,
   agentId?: string,
 ): PromptSection {
   const agentLabel = normalizeAgentLabel(config, agentId);
@@ -49,3 +49,4 @@ export function buildWritebackProtocolSection(
     ].join("\n"),
   };
 }
+

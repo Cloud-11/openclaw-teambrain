@@ -1,7 +1,7 @@
-import { homedir } from "node:os";
+﻿import { homedir } from "node:os";
 import { isAbsolute, resolve } from "node:path";
 
-export type TeamBrainLayers = {
+export type NeigeLayers = {
   includeTeamCharter: boolean;
   includeGlobalRules: boolean;
   includeProfiles: boolean;
@@ -10,37 +10,37 @@ export type TeamBrainLayers = {
   includePrivateWorkspace: boolean;
 };
 
-export type TeamBrainPromptBudget = {
+export type NeigePromptBudget = {
   maxCharsPerSection: number;
   maxTotalChars: number;
   maxWorkspaceFiles: number;
   maxWorkspaceFileChars: number;
 };
 
-export type TeamBrainRolePolicy = {
+export type NeigeRolePolicy = {
   label?: string;
   writebackGuidance: string[];
 };
 
-export type TeamBrainAgentMappings = {
+export type NeigeAgentMappings = {
   profiles: Record<string, string>;
   workspaces: Record<string, string>;
   roles: Record<string, string>;
 };
 
-export type TeamBrainConfig = {
+export type NeigeConfig = {
   brainRoot: string;
   teamId: string;
   projectId: string;
-  layers: TeamBrainLayers;
-  promptBudget: TeamBrainPromptBudget;
-  agentMappings: TeamBrainAgentMappings;
-  rolePolicies: Record<string, TeamBrainRolePolicy>;
+  layers: NeigeLayers;
+  promptBudget: NeigePromptBudget;
+  agentMappings: NeigeAgentMappings;
+  rolePolicies: Record<string, NeigeRolePolicy>;
 };
 
 type ResolvePath = (input: string) => string;
 
-const DEFAULT_LAYERS: TeamBrainLayers = {
+const DEFAULT_LAYERS: NeigeLayers = {
   includeTeamCharter: true,
   includeGlobalRules: true,
   includeProfiles: true,
@@ -49,14 +49,14 @@ const DEFAULT_LAYERS: TeamBrainLayers = {
   includePrivateWorkspace: false,
 };
 
-const DEFAULT_PROMPT_BUDGET: TeamBrainPromptBudget = {
+const DEFAULT_PROMPT_BUDGET: NeigePromptBudget = {
   maxCharsPerSection: 3000,
   maxTotalChars: 12000,
   maxWorkspaceFiles: 3,
   maxWorkspaceFileChars: 1200,
 };
 
-const DEFAULT_ROLE_POLICIES: Record<string, TeamBrainRolePolicy> = {
+const DEFAULT_ROLE_POLICIES: Record<string, NeigeRolePolicy> = {
   main: {
     label: "Main",
     writebackGuidance: [
@@ -91,7 +91,7 @@ function toRecord(value: unknown): Record<string, unknown> {
 
 function requireNonEmptyString(value: unknown, fieldName: string): string {
   if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`TeamBrain 配置缺少有效的 ${fieldName}`);
+    throw new Error(`Neige 配置缺少有效的 ${fieldName}`);
   }
 
   return value.trim();
@@ -130,9 +130,9 @@ function readStringArray(value: unknown): string[] {
     .filter(Boolean);
 }
 
-function readRolePolicies(value: unknown): Record<string, TeamBrainRolePolicy> {
+function readRolePolicies(value: unknown): Record<string, NeigeRolePolicy> {
   const record = toRecord(value);
-  const result: Record<string, TeamBrainRolePolicy> = {};
+  const result: Record<string, NeigeRolePolicy> = {};
 
   for (const [roleId, rawPolicy] of Object.entries(record)) {
     const policyRecord = toRecord(rawPolicy);
@@ -156,10 +156,10 @@ function readRolePolicies(value: unknown): Record<string, TeamBrainRolePolicy> {
 }
 
 function mergeRolePolicies(
-  defaults: Record<string, TeamBrainRolePolicy>,
-  overrides: Record<string, TeamBrainRolePolicy>,
-): Record<string, TeamBrainRolePolicy> {
-  const result: Record<string, TeamBrainRolePolicy> = {};
+  defaults: Record<string, NeigeRolePolicy>,
+  overrides: Record<string, NeigeRolePolicy>,
+): Record<string, NeigeRolePolicy> {
+  const result: Record<string, NeigeRolePolicy> = {};
 
   for (const [roleId, policy] of Object.entries(defaults)) {
     result[roleId] = {
@@ -199,10 +199,10 @@ function normalizePathForConfig(value: string, resolvePath?: ResolvePath): strin
   return resolve(trimmed).replace(/\\/g, "/");
 }
 
-export function normalizeTeamBrainConfig(
+export function normalizeNeigeConfig(
   raw: unknown,
   resolvePath?: ResolvePath,
-): TeamBrainConfig {
+): NeigeConfig {
   const record = toRecord(raw);
   const layerRecord = toRecord(record.layers);
   const budgetRecord = toRecord(record.promptBudget);
@@ -270,3 +270,4 @@ export function normalizeTeamBrainConfig(
     rolePolicies,
   };
 }
+

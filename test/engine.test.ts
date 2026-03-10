@@ -1,16 +1,16 @@
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { normalizeTeamBrainConfig } from "../src/config.ts";
-import { createTeamBrainContextEngine } from "../src/engine.ts";
+import { normalizeNeigeConfig } from "../src/config.ts";
+import { createNeigeContextEngine } from "../src/engine.ts";
 
 async function writeUtf8(filePath: string, content: string): Promise<void> {
   await mkdir(join(filePath, ".."), { recursive: true });
   await writeFile(filePath, content, "utf8");
 }
 
-describe("createTeamBrainContextEngine", () => {
+describe("createNeigeContextEngine", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -20,7 +20,7 @@ describe("createTeamBrainContextEngine", () => {
   });
 
   it("会把团队规则和项目状态装配到系统上下文里", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-engine-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-engine-"));
     tempDirs.push(root);
 
     await writeUtf8(join(root, "my-dev-team/config/team-charter.md"), "# 团队宪法\n必须写单元测试");
@@ -34,13 +34,13 @@ describe("createTeamBrainContextEngine", () => {
       "- 修复下午 6 点崩溃",
     );
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
     });
 
-    const engine = createTeamBrainContextEngine(config);
+    const engine = createNeigeContextEngine(config);
     const messages = [{ role: "user", content: "你好", timestamp: Date.now() }] as never[];
     const result = await engine.assemble({
       sessionId: "session-1",
@@ -57,16 +57,16 @@ describe("createTeamBrainContextEngine", () => {
   });
 
   it("在项目文件缺失时会优雅降级而不是抛错", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-engine-empty-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-engine-empty-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "empty-project",
     });
 
-    const engine = createTeamBrainContextEngine(config);
+    const engine = createNeigeContextEngine(config);
     const result = await engine.assemble({
       sessionId: "session-empty",
       messages: [],
@@ -78,7 +78,7 @@ describe("createTeamBrainContextEngine", () => {
   });
 
   it("会根据 assemble 的 tokenBudget 收紧最终上下文大小", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-engine-budget-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-engine-budget-"));
     tempDirs.push(root);
 
     await writeUtf8(
@@ -90,7 +90,7 @@ describe("createTeamBrainContextEngine", () => {
       `# 全局规则\n${"禁止高危命令并保持任务同步。".repeat(80)}`,
     );
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "budget-project",
@@ -99,7 +99,7 @@ describe("createTeamBrainContextEngine", () => {
       },
     });
 
-    const engine = createTeamBrainContextEngine(config);
+    const engine = createNeigeContextEngine(config);
     const result = await engine.assemble({
       sessionId: "session-budget",
       messages: [],
@@ -111,3 +111,4 @@ describe("createTeamBrainContextEngine", () => {
     expect(result.systemPromptAddition!.length).toBeLessThanOrEqual(320);
   });
 });
+

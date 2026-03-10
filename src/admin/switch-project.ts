@@ -1,19 +1,19 @@
-import { join } from "node:path";
-import { initializeTeamBrain, type InitializeTeamBrainOptions } from "./init-teambrain.ts";
+﻿import { join } from "node:path";
+import { initializeNeige, type InitializeNeigeOptions } from "./init-neige.ts";
 
-export type SwitchTeamBrainProjectOptions = InitializeTeamBrainOptions;
+export type SwitchNeigeProjectOptions = InitializeNeigeOptions;
 
-export type SwitchTeamBrainProjectResult = {
+export type SwitchNeigeProjectResult = {
   teamRoot: string;
   projectRoot: string;
   projectStateDir: string;
   createdFiles: string[];
 };
 
-export async function switchTeamBrainProject(
-  options: SwitchTeamBrainProjectOptions,
-): Promise<SwitchTeamBrainProjectResult> {
-  const result = await initializeTeamBrain(options);
+export async function switchNeigeProject(
+  options: SwitchNeigeProjectOptions,
+): Promise<SwitchNeigeProjectResult> {
+  const result = await initializeNeige(options);
   const projectRoot = join(result.teamRoot, "projects", options.projectId.trim());
 
   return {
@@ -23,3 +23,4 @@ export async function switchTeamBrainProject(
     createdFiles: result.createdFiles,
   };
 }
+

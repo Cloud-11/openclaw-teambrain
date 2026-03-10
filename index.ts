@@ -1,9 +1,9 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
-import { normalizeTeamBrainConfig } from "./src/config.ts";
-import { createTeamBrainContextEngine } from "./src/engine.ts";
+﻿import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
+import { normalizeNeigeConfig } from "./src/config.ts";
+import { createNeigeContextEngine } from "./src/engine.ts";
 import { buildAgentPromptAddition } from "./src/hooks.ts";
-import { createTeamBrainProfileTool, createTeamBrainRulesTool } from "./src/memory-tools.ts";
-import { createTeamBrainWritebackTool } from "./src/writeback-tool.ts";
+import { createNeigeProfileTool, createNeigeRulesTool } from "./src/memory-tools.ts";
+import { createNeigeWritebackTool } from "./src/writeback-tool.ts";
 
 function isNeigeActive(api: OpenClawPluginApi): boolean {
   return api.config.plugins?.slots?.contextEngine === "neige";
@@ -16,12 +16,12 @@ const plugin = {
   version: "0.1.0",
   kind: "context-engine",
   async register(api: OpenClawPluginApi) {
-    const config = normalizeTeamBrainConfig(api.pluginConfig ?? {}, api.resolvePath);
+    const config = normalizeNeigeConfig(api.pluginConfig ?? {}, api.resolvePath);
 
-    api.registerContextEngine("neige", () => createTeamBrainContextEngine(config));
-    api.registerTool(createTeamBrainWritebackTool(config));
-    api.registerTool(createTeamBrainProfileTool(config));
-    api.registerTool(createTeamBrainRulesTool(config));
+    api.registerContextEngine("neige", () => createNeigeContextEngine(config));
+    api.registerTool(createNeigeWritebackTool(config));
+    api.registerTool(createNeigeProfileTool(config));
+    api.registerTool(createNeigeRulesTool(config));
 
     api.on("before_prompt_build", async (_event, ctx) => {
       if (!isNeigeActive(api)) {
@@ -39,3 +39,4 @@ const plugin = {
 };
 
 export default plugin;
+

@@ -1,7 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
+﻿import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { PluginTool } from "openclaw/plugin-sdk/core";
-import type { TeamBrainConfig } from "./config.ts";
+import type { NeigeConfig } from "./config.ts";
 import { DirectoryLockTimeoutError, type LockOptions, withDirectoryLock } from "./file-lock.ts";
 import { readOptionalUtf8 } from "./files.ts";
 
@@ -18,19 +18,19 @@ type TodoItem = {
 
 type WritebackAction = "set_project_state" | "upsert_todo" | "remove_todo";
 
-function getStateDir(config: TeamBrainConfig): string {
+function getStateDir(config: NeigeConfig): string {
   return join(config.brainRoot, config.teamId, "projects", config.projectId, "state");
 }
 
-function getProjectStatePath(config: TeamBrainConfig): string {
+function getProjectStatePath(config: NeigeConfig): string {
   return join(getStateDir(config), "PROJECT_STATE.md");
 }
 
-function getTodoPath(config: TeamBrainConfig): string {
+function getTodoPath(config: NeigeConfig): string {
   return join(getStateDir(config), "TODO.md");
 }
 
-function getLockDir(config: TeamBrainConfig): string {
+function getLockDir(config: NeigeConfig): string {
   return join(getStateDir(config), ".neige.lock");
 }
 
@@ -101,7 +101,7 @@ function parseProjectState(markdown?: string): ProjectStateSnapshot {
   };
 }
 
-function renderProjectState(config: TeamBrainConfig, snapshot: ProjectStateSnapshot): string {
+function renderProjectState(config: NeigeConfig, snapshot: ProjectStateSnapshot): string {
   const activeTasks =
     snapshot.activeTasks.length > 0
       ? snapshot.activeTasks.map((task) => `- ${task}`).join("\n")
@@ -147,12 +147,12 @@ function renderTodo(items: TodoItem[]): string {
   return ["# TODO", "", body, ""].join("\n");
 }
 
-async function ensureStateDir(config: TeamBrainConfig): Promise<void> {
+async function ensureStateDir(config: NeigeConfig): Promise<void> {
   await mkdir(getStateDir(config), { recursive: true });
 }
 
 async function writeProjectState(
-  config: TeamBrainConfig,
+  config: NeigeConfig,
   params: Record<string, unknown>,
 ): Promise<{ filePath: string; snapshot: ProjectStateSnapshot }> {
   const filePath = getProjectStatePath(config);
@@ -171,7 +171,7 @@ async function writeProjectState(
 }
 
 async function writeTodo(
-  config: TeamBrainConfig,
+  config: NeigeConfig,
   params: Record<string, unknown>,
 ): Promise<{ filePath: string; items: TodoItem[] }> {
   const filePath = getTodoPath(config);
@@ -209,8 +209,8 @@ type WritebackToolOptions = {
   lockOptions?: Omit<LockOptions, "metadata">;
 };
 
-export function createTeamBrainWritebackTool(
-  config: TeamBrainConfig,
+export function createNeigeWritebackTool(
+  config: NeigeConfig,
   options?: WritebackToolOptions,
 ): PluginTool {
   return {
@@ -283,3 +283,4 @@ export function createTeamBrainWritebackTool(
     },
   };
 }
+

@@ -1,8 +1,8 @@
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { normalizeTeamBrainConfig } from "../src/config.ts";
+import { normalizeNeigeConfig } from "../src/config.ts";
 import { buildAgentPromptAddition } from "../src/hooks.ts";
 
 async function writeUtf8(filePath: string, content: string): Promise<void> {
@@ -20,7 +20,7 @@ describe("buildAgentPromptAddition", () => {
   });
 
   it("会根据 agentId 注入个人档案和项目草稿", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-"));
     tempDirs.push(root);
 
     await writeUtf8(
@@ -32,7 +32,7 @@ describe("buildAgentPromptAddition", () => {
       "下午 6 点重置逻辑要小心",
     );
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -51,10 +51,10 @@ describe("buildAgentPromptAddition", () => {
   });
 
   it("会注入紧凑的写回协议，指导 Agent 调用 neige-state", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-protocol-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-protocol-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -72,10 +72,10 @@ describe("buildAgentPromptAddition", () => {
   });
 
   it("会按角色注入不同的写回职责提示", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-role-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-role-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -97,10 +97,10 @@ describe("buildAgentPromptAddition", () => {
   });
 
   it("会按配置映射注入自定义角色协议", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-hook-custom-role-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-custom-role-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -130,3 +130,4 @@ describe("buildAgentPromptAddition", () => {
     expect(prompt).toContain("Planner 优先统一维护 PROJECT_STATE.md。");
   });
 });
+

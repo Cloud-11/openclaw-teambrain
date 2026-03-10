@@ -1,14 +1,14 @@
-import { access } from "node:fs/promises";
+﻿import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join } from "node:path";
 
-export type CheckTeamBrainHealthOptions = {
+export type CheckNeigeHealthOptions = {
   brainRoot: string;
   teamId: string;
   projectId: string;
 };
 
-export type CheckTeamBrainHealthResult = {
+export type CheckNeigeHealthResult = {
   ok: boolean;
   missingDirectories: string[];
   missingFiles: string[];
@@ -29,9 +29,9 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-export async function checkTeamBrainHealth(
-  options: CheckTeamBrainHealthOptions,
-): Promise<CheckTeamBrainHealthResult> {
+export async function checkNeigeHealth(
+  options: CheckNeigeHealthOptions,
+): Promise<CheckNeigeHealthResult> {
   const teamRoot = join(options.brainRoot, options.teamId);
   const projectRoot = join(teamRoot, "projects", options.projectId);
 
@@ -65,7 +65,7 @@ export async function checkTeamBrainHealth(
 
   const suggestions =
     missingDirectories.length > 0 || missingFiles.length > 0
-      ? ["运行初始化工具补齐 TeamBrain 目录和模板文件。"]
+      ? ["运行初始化工具补齐 Neige 目录和模板文件。"]
       : [];
 
   return {
@@ -75,3 +75,4 @@ export async function checkTeamBrainHealth(
     suggestions,
   };
 }
+

@@ -1,18 +1,18 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  createRegisteredTeamBrainHarness,
+  createRegisteredNeigeHarness,
   getRegisteredTool,
-} from "../helpers/teambrain-runtime-harness.ts";
+} from "../helpers/neige-runtime-harness.ts";
 
 async function writeUtf8(filePath: string, content: string): Promise<void> {
   await mkdir(join(filePath, ".."), { recursive: true });
   await writeFile(filePath, content, "utf8");
 }
 
-describe("teambrain runtime smoke", () => {
+describe("neige runtime smoke", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -21,7 +21,7 @@ describe("teambrain runtime smoke", () => {
   });
 
   it("会串通插件注册、共享上下文、Agent hook 和三个写回工具", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-runtime-smoke-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-runtime-smoke-"));
     tempDirs.push(root);
 
     await writeUtf8(join(root, "my-dev-team/memory_global/global_rules.md"), "# 团队长期规则\n\n- [tests] 新功能必须补测试\n");
@@ -35,7 +35,7 @@ describe("teambrain runtime smoke", () => {
       "# coder 个人档案\n\n## 擅长\n- C#\n",
     );
 
-    const harness = await createRegisteredTeamBrainHarness({
+    const harness = await createRegisteredNeigeHarness({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -89,3 +89,4 @@ describe("teambrain runtime smoke", () => {
     expect(todo).toContain("- [x] 补集成 smoke 测试");
   });
 });
+

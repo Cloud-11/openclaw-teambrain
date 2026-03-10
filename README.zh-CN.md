@@ -1,4 +1,4 @@
-# Neige
+﻿# Neige
 
 简体中文 · [English](./README.md)
 
@@ -25,7 +25,7 @@
 
 ## 架构概览
 
-TeamBrain 采用混合运行时设计：
+Neige 采用混合运行时设计：
 
 - **共享上下文**：通过 `context-engine` 的 `assemble()`
 - **个人上下文**：通过 `before_prompt_build`
@@ -293,3 +293,4 @@ Neige 现在有两层预算：
 ## 许可证
 
 MIT
+

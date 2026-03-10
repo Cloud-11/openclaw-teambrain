@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -13,7 +13,7 @@ describe("withDirectoryLock", () => {
   });
 
   it("锁超时时会在错误信息中带出锁元数据诊断", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-file-lock-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-file-lock-"));
     tempDirs.push(root);
 
     const lockDir = join(root, ".neige.lock");
@@ -52,7 +52,7 @@ describe("withDirectoryLock", () => {
   });
 
   it("获取锁后会写入锁元数据文件", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-file-lock-meta-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-file-lock-meta-"));
     tempDirs.push(root);
 
     const lockDir = join(root, ".neige.lock");
@@ -77,3 +77,4 @@ describe("withDirectoryLock", () => {
     expect(snapshot).toContain("set_project_state");
   });
 });
+

@@ -1,7 +1,7 @@
-import type { PluginTool } from "openclaw/plugin-sdk/core";
+﻿import type { PluginTool } from "openclaw/plugin-sdk/core";
 import plugin from "../../index.ts";
 
-type TeamBrainHarnessConfig = {
+type NeigeHarnessConfig = {
   brainRoot: string;
   teamId: string;
   projectId: string;
@@ -28,15 +28,15 @@ type BeforePromptBuildHandler = (
   ctx: { agentId?: string },
 ) => Promise<BeforePromptBuildResult | undefined> | BeforePromptBuildResult | undefined;
 
-export type TeamBrainRuntimeHarness = {
+export type NeigeRuntimeHarness = {
   registeredTools: PluginTool[];
   contextEngine: ContextEngineLike;
   runBeforePromptBuild: (ctx: { agentId?: string }) => Promise<BeforePromptBuildResult | undefined>;
 };
 
-export async function createRegisteredTeamBrainHarness(
-  config: TeamBrainHarnessConfig,
-): Promise<TeamBrainRuntimeHarness> {
+export async function createRegisteredNeigeHarness(
+  config: NeigeHarnessConfig,
+): Promise<NeigeRuntimeHarness> {
   const registeredTools: PluginTool[] = [];
   let contextEngineFactory: (() => ContextEngineLike) | undefined;
   let beforePromptBuildHandler: BeforePromptBuildHandler | undefined;
@@ -63,7 +63,7 @@ export async function createRegisteredTeamBrainHarness(
   });
 
   if (!contextEngineFactory) {
-    throw new Error("未注册 TeamBrain context-engine");
+    throw new Error("未注册 Neige context-engine");
   }
 
   if (!beforePromptBuildHandler) {
@@ -79,7 +79,7 @@ export async function createRegisteredTeamBrainHarness(
 }
 
 export function getRegisteredTool(
-  harness: TeamBrainRuntimeHarness,
+  harness: NeigeRuntimeHarness,
   toolName: string,
 ): PluginTool {
   const tool = harness.registeredTools.find((entry) => entry.name === toolName);
@@ -89,3 +89,4 @@ export function getRegisteredTool(
 
   return tool;
 }
+

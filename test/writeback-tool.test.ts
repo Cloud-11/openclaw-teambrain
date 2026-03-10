@@ -1,16 +1,16 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { normalizeTeamBrainConfig } from "../src/config.ts";
-import { createTeamBrainWritebackTool } from "../src/writeback-tool.ts";
+import { normalizeNeigeConfig } from "../src/config.ts";
+import { createNeigeWritebackTool } from "../src/writeback-tool.ts";
 
 async function writeUtf8(filePath: string, content: string): Promise<void> {
   await mkdir(join(filePath, ".."), { recursive: true });
   await writeFile(filePath, content, "utf8");
 }
 
-describe("createTeamBrainWritebackTool", () => {
+describe("createNeigeWritebackTool", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -20,16 +20,16 @@ describe("createTeamBrainWritebackTool", () => {
   });
 
   it("会写入 PROJECT_STATE.md 并自动创建目录", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-state-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-writeback-state-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
     });
 
-    const tool = createTeamBrainWritebackTool(config);
+    const tool = createNeigeWritebackTool(config);
     await tool.execute("call-1", {
       action: "set_project_state",
       stage: "开发中",
@@ -51,16 +51,16 @@ describe("createTeamBrainWritebackTool", () => {
   });
 
   it("会新增并更新 TODO 项状态", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-todo-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-writeback-todo-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
     });
 
-    const tool = createTeamBrainWritebackTool(config);
+    const tool = createNeigeWritebackTool(config);
     await tool.execute("call-2", {
       action: "upsert_todo",
       text: "修复下午 6 点崩溃",
@@ -78,7 +78,7 @@ describe("createTeamBrainWritebackTool", () => {
   });
 
   it("会删除 TODO 项", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-remove-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-writeback-remove-"));
     tempDirs.push(root);
 
     await writeUtf8(
@@ -86,13 +86,13 @@ describe("createTeamBrainWritebackTool", () => {
       "# TODO\n\n- [ ] 修复下午 6 点崩溃\n- [ ] 补文档\n",
     );
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
     });
 
-    const tool = createTeamBrainWritebackTool(config);
+    const tool = createNeigeWritebackTool(config);
     await tool.execute("call-4", {
       action: "remove_todo",
       text: "修复下午 6 点崩溃",
@@ -104,10 +104,10 @@ describe("createTeamBrainWritebackTool", () => {
   });
 
   it("遇到锁文件时会等待后再写入，避免并发覆盖", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-lock-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-writeback-lock-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -117,7 +117,7 @@ describe("createTeamBrainWritebackTool", () => {
     const lockDir = join(stateDir, ".neige.lock");
     await mkdir(lockDir, { recursive: true });
 
-    const tool = createTeamBrainWritebackTool(config);
+    const tool = createNeigeWritebackTool(config);
     const startedAt = Date.now();
 
     setTimeout(() => {
@@ -138,10 +138,10 @@ describe("createTeamBrainWritebackTool", () => {
   });
 
   it("锁超时时会返回可诊断的结果，而不是静默失败", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-writeback-timeout-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-writeback-timeout-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -162,7 +162,7 @@ describe("createTeamBrainWritebackTool", () => {
       ),
     );
 
-    const tool = createTeamBrainWritebackTool(
+    const tool = createNeigeWritebackTool(
       config,
       {
         lockOptions: {
@@ -184,3 +184,4 @@ describe("createTeamBrainWritebackTool", () => {
     );
   });
 });
+

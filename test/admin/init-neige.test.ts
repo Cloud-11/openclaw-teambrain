@@ -1,14 +1,14 @@
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
+﻿import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { initializeTeamBrain } from "../../src/admin/init-teambrain.ts";
+import { initializeNeige } from "../../src/admin/init-neige.ts";
 
 async function expectPathExists(path: string): Promise<void> {
   await expect(stat(path)).resolves.toBeDefined();
 }
 
-describe("initializeTeamBrain", () => {
+describe("initializeNeige", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -16,11 +16,11 @@ describe("initializeTeamBrain", () => {
     tempDirs.length = 0;
   });
 
-  it("会创建最小 TeamBrain 目录与 UTF-8 模板文件", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-init-"));
+  it("会创建最小 Neige 目录与 UTF-8 模板文件", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-init-"));
     tempDirs.push(root);
 
-    const result = await initializeTeamBrain({
+    const result = await initializeNeige({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -58,3 +58,4 @@ describe("initializeTeamBrain", () => {
     );
   });
 });
+

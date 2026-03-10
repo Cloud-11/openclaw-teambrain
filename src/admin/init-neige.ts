@@ -1,14 +1,14 @@
-import { access, mkdir, writeFile } from "node:fs/promises";
+﻿import { access, mkdir, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join } from "node:path";
 
-export type InitializeTeamBrainOptions = {
+export type InitializeNeigeOptions = {
   brainRoot: string;
   teamId: string;
   projectId: string;
 };
 
-export type InitializeTeamBrainResult = {
+export type InitializeNeigeResult = {
   teamRoot: string;
   projectStateDir: string;
   createdFiles: string[];
@@ -71,9 +71,9 @@ function buildTodoTemplate(): string {
   return ["# TODO", "", ""].join("\n");
 }
 
-export async function initializeTeamBrain(
-  options: InitializeTeamBrainOptions,
-): Promise<InitializeTeamBrainResult> {
+export async function initializeNeige(
+  options: InitializeNeigeOptions,
+): Promise<InitializeNeigeResult> {
   const brainRoot = requireNonEmptyString(options.brainRoot, "brainRoot");
   const teamId = requireNonEmptyString(options.teamId, "teamId");
   const projectId = requireNonEmptyString(options.projectId, "projectId");
@@ -110,3 +110,4 @@ export async function initializeTeamBrain(
     createdFiles,
   };
 }
+

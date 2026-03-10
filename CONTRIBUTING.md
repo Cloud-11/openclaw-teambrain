@@ -1,4 +1,4 @@
-# Contributing
+﻿# Contributing
 
 Thanks for your interest in `OpenClaw Neige`.
 
@@ -47,7 +47,7 @@ Please use the Feature Request issue form and describe:
 
 - the problem you want to solve
 - the workflow you want to improve
-- why it belongs in TeamBrain rather than a one-off local script
+- why it belongs in Neige rather than a one-off local script
 
 ## Security
 
@@ -57,3 +57,4 @@ Do not open public issues for security vulnerabilities. Follow `SECURITY.md` ins
 
 - End-user docs should be maintained in English and Simplified Chinese
 - Code comments should stay concise and only explain non-obvious logic
+

@@ -1,14 +1,14 @@
-import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { switchTeamBrainProject } from "../../src/admin/switch-project.ts";
+import { switchNeigeProject } from "../../src/admin/switch-project.ts";
 
 async function expectPathExists(path: string): Promise<void> {
   await expect(stat(path)).resolves.toBeDefined();
 }
 
-describe("switchTeamBrainProject", () => {
+describe("switchNeigeProject", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
@@ -17,7 +17,7 @@ describe("switchTeamBrainProject", () => {
   });
 
   it("会补齐项目目录，但不会覆盖已有 PROJECT_STATE.md", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-switch-"));
+    const root = await mkdtemp(join(tmpdir(), "neige-switch-"));
     tempDirs.push(root);
 
     const projectStateDir = join(root, "my-dev-team/projects/stardew-mod/state");
@@ -28,7 +28,7 @@ describe("switchTeamBrainProject", () => {
       "utf8",
     );
 
-    const result = await switchTeamBrainProject({
+    const result = await switchNeigeProject({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -50,3 +50,4 @@ describe("switchTeamBrainProject", () => {
     );
   });
 });
+

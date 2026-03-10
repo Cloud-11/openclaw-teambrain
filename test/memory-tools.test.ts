@@ -1,11 +1,11 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+﻿import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { normalizeTeamBrainConfig } from "../src/config.ts";
+import { normalizeNeigeConfig } from "../src/config.ts";
 import {
-  createTeamBrainProfileTool,
-  createTeamBrainRulesTool,
+  createNeigeProfileTool,
+  createNeigeRulesTool,
 } from "../src/memory-tools.ts";
 
 describe("memory tools", () => {
@@ -16,17 +16,17 @@ describe("memory tools", () => {
     tempDirs.length = 0;
   });
 
-  it("teambrain-profile 会按标准 section 写入并支持 append", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-profile-tool-"));
+  it("neige-profile 会按标准 section 写入并支持 append", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-profile-tool-"));
     tempDirs.push(root);
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
     });
 
-    const tool = createTeamBrainProfileTool(config);
+    const tool = createNeigeProfileTool(config);
     await tool.execute("call-1", {
       action: "upsert_section",
       agentId: "coder",
@@ -54,8 +54,8 @@ describe("memory tools", () => {
     expect(content).toContain("- Python");
   });
 
-  it("teambrain-rules 会受控更新并删除长期规则条目", async () => {
-    const root = await mkdtemp(join(tmpdir(), "teambrain-rules-tool-"));
+  it("neige-rules 会受控更新并删除长期规则条目", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-rules-tool-"));
     tempDirs.push(root);
 
     await mkdir(join(root, "my-dev-team/memory_global"), { recursive: true });
@@ -65,13 +65,13 @@ describe("memory tools", () => {
       "utf8",
     );
 
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: root,
       teamId: "my-dev-team",
       projectId: "stardew-mod",
     });
 
-    const tool = createTeamBrainRulesTool(config);
+    const tool = createNeigeRulesTool(config);
     await tool.execute("call-3", {
       action: "upsert_rule",
       ruleId: "exception-handling",
@@ -91,3 +91,4 @@ describe("memory tools", () => {
     expect(content).not.toContain("- [tests] 新功能必须补测试");
   });
 });
+

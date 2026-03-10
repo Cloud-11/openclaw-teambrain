@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { normalizeTeamBrainConfig } from "../src/config.ts";
+﻿import { describe, expect, it } from "vitest";
+import { normalizeNeigeConfig } from "../src/config.ts";
 
-describe("normalizeTeamBrainConfig", () => {
+describe("normalizeNeigeConfig", () => {
   it("会补齐默认值并解析 brainRoot", () => {
-    const config = normalizeTeamBrainConfig(
+    const config = normalizeNeigeConfig(
       {
         brainRoot: "./brains",
         teamId: "my-dev-team",
@@ -24,7 +24,7 @@ describe("normalizeTeamBrainConfig", () => {
   });
 
   it("会解析角色映射与自定义角色策略", () => {
-    const config = normalizeTeamBrainConfig({
+    const config = normalizeNeigeConfig({
       brainRoot: "./brains",
       teamId: "my-dev-team",
       projectId: "stardew-mod",
@@ -51,3 +51,4 @@ describe("normalizeTeamBrainConfig", () => {
     );
   });
 });
+

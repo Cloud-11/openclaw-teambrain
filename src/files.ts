@@ -1,6 +1,6 @@
-import { readdir, readFile } from "node:fs/promises";
+﻿import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { TeamBrainConfig } from "./config.ts";
+import type { NeigeConfig } from "./config.ts";
 
 export type PromptSection = {
   title: string;
@@ -34,23 +34,23 @@ export async function readOptionalUtf8(filePath: string): Promise<string | undef
   }
 }
 
-function teamRoot(config: TeamBrainConfig): string {
+function teamRoot(config: NeigeConfig): string {
   return join(config.brainRoot, config.teamId);
 }
 
-function projectRoot(config: TeamBrainConfig): string {
+function projectRoot(config: NeigeConfig): string {
   return join(teamRoot(config), "projects", config.projectId);
 }
 
-function resolveProfileId(config: TeamBrainConfig, agentId: string): string {
+function resolveProfileId(config: NeigeConfig, agentId: string): string {
   return config.agentMappings.profiles[agentId] ?? agentId;
 }
 
-function resolveWorkspaceId(config: TeamBrainConfig, agentId: string): string {
+function resolveWorkspaceId(config: NeigeConfig, agentId: string): string {
   return config.agentMappings.workspaces[agentId] ?? agentId;
 }
 
-export async function loadSharedSections(config: TeamBrainConfig): Promise<PromptSection[]> {
+export async function loadSharedSections(config: NeigeConfig): Promise<PromptSection[]> {
   const sections: PromptSection[] = [];
 
   if (config.layers.includeTeamCharter) {
@@ -130,7 +130,7 @@ async function collectFilesRecursively(rootDir: string, depth: number): Promise<
 }
 
 export async function loadAgentSections(
-  config: TeamBrainConfig,
+  config: NeigeConfig,
   agentId?: string,
 ): Promise<PromptSection[]> {
   if (!agentId) {
@@ -187,7 +187,7 @@ export async function loadAgentSections(
 export function renderPromptSections(
   heading: string,
   sections: PromptSection[],
-  config: TeamBrainConfig,
+  config: NeigeConfig,
   options?: {
     maxTotalChars?: number;
   },
@@ -231,3 +231,4 @@ export function estimateTokensFromText(text?: string): number {
 
   return Math.ceil(text.length / 4);
 }
+
