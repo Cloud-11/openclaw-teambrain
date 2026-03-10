@@ -15,7 +15,7 @@ const plugin = {
   description: "将团队规则、项目白板和 Agent 私有上下文从代码仓库外部装配到 OpenClaw 中，形成长期协作系统",
   version: "0.1.0",
   kind: "context-engine",
-  async register(api: OpenClawPluginApi) {
+  register(api: OpenClawPluginApi) {
     const config = normalizeNeigeConfig(api.pluginConfig ?? {}, api.resolvePath);
 
     api.registerContextEngine("neige", () => createNeigeContextEngine(config));
