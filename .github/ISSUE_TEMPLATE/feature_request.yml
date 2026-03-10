@@ -20,7 +20,7 @@ body:
     id: proposal
     attributes:
       label: Proposed solution
-      description: What would you like TeamBrain to do?
+      description: What would you like Neige to do?
     validations:
       required: true
   - type: textarea
@@ -31,7 +31,7 @@ body:
   - type: textarea
     id: scope
     attributes:
-      label: Why this belongs in TeamBrain
+      label: Why this belongs in Neige
       description: Explain why this should be part of the plugin instead of a one-off local customization
     validations:
       required: true

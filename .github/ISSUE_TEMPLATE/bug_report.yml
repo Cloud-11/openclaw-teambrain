@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a reproducible bug in TeamBrain
+description: Report a reproducible bug in Neige
 title: "[Bug]: "
 labels:
   - bug
@@ -14,7 +14,7 @@ body:
     attributes:
       label: Summary
       description: Short description of the problem
-      placeholder: TeamBrain does not mount project TODO for subagents
+      placeholder: Neige does not mount project TODO for subagents
     validations:
       required: true
   - type: textarea
