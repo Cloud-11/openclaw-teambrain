@@ -1,22 +1,22 @@
-# OpenClaw TeamBrain
+# Neige
 
 [简体中文](./README.zh-CN.md) · English
 
-`OpenClaw TeamBrain` is an external-brain plugin for OpenClaw. It helps a fixed multi-agent team work across many projects without polluting source repositories with AI state, logs, or vector data.
+`Neige` is a long-lived multi-agent collaboration system built on OpenClaw. It helps a fixed team work across many projects without polluting source repositories with AI state, logs, or vector data.
 
 ## Status
 
 - V1 is available as a working standalone plugin skeleton
 - Shared context is mounted through a `context-engine`
 - Agent-specific context is appended through a lightweight prompt hook
-- A `teambrain-state` tool can now write back `PROJECT_STATE.md` and `TODO.md`
+- A `neige-state` tool can now write back `PROJECT_STATE.md` and `TODO.md`
 - V2 now injects a compact write-back protocol for agents and respects runtime `tokenBudget`
 - V3 adds role-aware write-back guidance and state-directory locking
 - V4 makes role mapping and role protocol policies configurable
-- Task 1 admin commands now cover init, switch, and health-check for local TeamBrain setup
+- Task 1 admin commands now cover init, switch, and health-check for local Neige setup
 - GitHub community, CI, release, and maintainer foundations are included
 
-## Why TeamBrain
+## Why Neige
 
 - **Clean repositories**: keep AI memory outside your business codebase
 - **Project isolation**: one project's temporary context does not leak into another
@@ -71,13 +71,13 @@ Current V1 context sources:
 {
   "plugins": {
     "load": {
-      "paths": ["/path/to/openclaw-teambrain"]
+      "paths": ["/path/to/openclaw-neige"]
     },
     "slots": {
-      "contextEngine": "teambrain"
+      "contextEngine": "neige"
     },
     "entries": {
-      "teambrain": {
+      "neige": {
         "enabled": true,
         "config": {
           "brainRoot": "~/.openclaw/brains",
@@ -124,29 +124,29 @@ npm run typecheck
 
 ## Local Admin Commands
 
-Initialize a minimal TeamBrain:
+Initialize a minimal Neige workspace:
 
 ```bash
-npm run teambrain:init -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+npm run neige:init -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
 ```
 
 Switch or bootstrap a project workspace:
 
 ```bash
-npm run teambrain:switch -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+npm run neige:switch -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
 ```
 
-Check current TeamBrain health:
+Check current Neige health:
 
 ```bash
-npm run teambrain:health -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+npm run neige:health -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
 ```
 
 These commands print structured JSON so they can be used manually or wrapped by later automation.
 
 ## State Write-back Tool
 
-TeamBrain now exposes a tool named `teambrain-state`.
+Neige now exposes a tool named `neige-state`.
 
 Supported actions:
 
@@ -175,15 +175,15 @@ Example payloads:
 
 ## Long-term Memory Tools
 
-TeamBrain now also exposes:
+Neige now also exposes:
 
-- `teambrain-profile`
-- `teambrain-rules`
+- `neige-profile`
+- `neige-rules`
 
 Recommended usage:
 
-- use `teambrain-profile` for L1 agent long-term profile updates
-- use `teambrain-rules` for L4 team-wide long-term rules
+- use `neige-profile` for L1 agent long-term profile updates
+- use `neige-rules` for L4 team-wide long-term rules
 - do not write temporary debugging notes or project-local noise into these files
 
 Example payloads:
@@ -210,7 +210,7 @@ Example payloads:
 
 Each agent now receives a compact write-back protocol through `before_prompt_build`.
 
-- Use `teambrain-state` only when project state really changes
+- Use `neige-state` only when project state really changes
 - Prefer one merged write-back instead of many tiny calls
 - Keep shared board updates short; leave long drafts in private workspace files
 - Let `set_project_state` carry stage, active tasks, and a short summary together
@@ -219,7 +219,7 @@ This keeps cross-agent coordination explicit without repeatedly stuffing long op
 
 ## V3 Stability
 
-TeamBrain now adds two stability guards for multi-agent collaboration:
+Neige now adds two stability guards for multi-agent collaboration:
 
 - role-aware protocol text for `main`, `coder`, `writer`, and `qa`
 - a shared state-directory lock before mutating `PROJECT_STATE.md` or `TODO.md`
@@ -236,11 +236,11 @@ You can now also:
 - override a built-in role policy
 - define a completely new role with `rolePolicies`
 
-This keeps TeamBrain generic while letting each team customize protocol text without patching plugin source code.
+This keeps Neige generic while letting each team customize protocol text without patching plugin source code.
 
 ## Current Non-Goals
 
-At the current stabilization stage, TeamBrain intentionally does **not** try to solve everything.
+At the current stabilization stage, Neige intentionally does **not** try to solve everything.
 
 Not in scope right now:
 
@@ -253,7 +253,7 @@ The current focus is a stable external-brain plugin with clear boundaries, contr
 
 ## Token Strategy
 
-TeamBrain uses two budget layers:
+Neige uses two budget layers:
 
 - static plugin budget from `promptBudget.maxTotalChars`
 - runtime clamp from `assemble({ tokenBudget })`
@@ -275,7 +275,7 @@ This repository now includes:
 ## Star History
 
 ```md
-[![Star History Chart](https://api.star-history.com/svg?repos=cloud-11/openclaw-teambrain&type=Date)](https://star-history.com/#cloud-11/openclaw-teambrain&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=cloud-11/neige&type=Date)](https://star-history.com/#cloud-11/neige&Date)
 ```
 
 ## Acknowledgements
@@ -288,7 +288,7 @@ This repository now includes:
 
 - long-term retrieval and vector indexing
 - multi-agent project switching helpers
-- optional CLI/admin commands for TeamBrain maintenance
+- optional CLI/admin commands for Neige maintenance
 
 ## License
 

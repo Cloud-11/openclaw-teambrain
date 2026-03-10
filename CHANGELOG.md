@@ -8,7 +8,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Added
 
-- Initial standalone `teambrain` context-engine plugin skeleton
+- Initial standalone `neige` context-engine plugin skeleton
 - Shared context assembly for team and project state
 - Agent-specific prompt injection for profiles and private workspace notes
 - GitHub community files, CI workflows, release automation, and bilingual project docs

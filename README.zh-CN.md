@@ -1,22 +1,22 @@
-# OpenClaw TeamBrain
+# Neige
 
 简体中文 · [English](./README.md)
 
-`OpenClaw TeamBrain` 是一个面向 OpenClaw 的外部团队大脑插件，用来支撑固定多 Agent 团队在多个项目之间长期协作，同时保持业务代码仓库纯净。
+`Neige` 是一个构建在 OpenClaw 之上的长期多 Agent 协作系统，用来支撑固定团队在多个项目之间长期协作，同时保持业务代码仓库纯净。
 
 ## 当前状态
 
 - V1 已具备可运行的独立插件骨架
 - 共享上下文通过 `context-engine` 装配
 - Agent 私有上下文通过轻量 prompt hook 挂载
-- 已提供 `teambrain-state` 工具，可写回 `PROJECT_STATE.md` 和 `TODO.md`
+- 已提供 `neige-state` 工具，可写回 `PROJECT_STATE.md` 和 `TODO.md`
 - V2 已增加紧凑写回协议注入，并支持运行时 `tokenBudget` 限流
 - V3 已增加角色化写回协议和共享状态目录锁
 - V4 已支持角色映射和角色协议策略配置化
 - Task 1 已补齐本地初始化、项目切换和健康检查命令入口
 - GitHub 社区治理、CI、发布和维护者流程底座已补齐
 
-## 为什么要用 TeamBrain
+## 为什么要用 Neige
 
 - **代码仓库纯净**：AI 记忆不写回业务仓库
 - **项目隔离**：项目 A 的临时上下文不会污染项目 B
@@ -71,13 +71,13 @@ V1 当前支持的上下文来源：
 {
   "plugins": {
     "load": {
-      "paths": ["/path/to/openclaw-teambrain"]
+      "paths": ["/path/to/openclaw-neige"]
     },
     "slots": {
-      "contextEngine": "teambrain"
+      "contextEngine": "neige"
     },
     "entries": {
-      "teambrain": {
+      "neige": {
         "enabled": true,
         "config": {
           "brainRoot": "~/.openclaw/brains",
@@ -124,29 +124,29 @@ npm run typecheck
 
 ## 本地管理命令
 
-初始化一个最小 TeamBrain：
+初始化一个最小 Neige 工作区：
 
 ```bash
-npm run teambrain:init -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+npm run neige:init -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
 ```
 
 切换或补齐某个项目目录：
 
 ```bash
-npm run teambrain:switch -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+npm run neige:switch -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
 ```
 
-检查当前 TeamBrain 健康状态：
+检查当前 Neige 健康状态：
 
 ```bash
-npm run teambrain:health -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
+npm run neige:health -- --brain-root ~/.openclaw/brains --team-id my-dev-team --project-id stardew-mod
 ```
 
 这些命令会输出结构化 JSON，既可以手工使用，也方便后续被自动化脚本封装。
 
 ## 状态写回工具
 
-TeamBrain 现在提供一个 `teambrain-state` 工具。
+Neige 现在提供一个 `neige-state` 工具。
 
 支持的动作：
 
@@ -175,15 +175,15 @@ TeamBrain 现在提供一个 `teambrain-state` 工具。
 
 ## 长期记忆工具
 
-TeamBrain 现在还提供：
+Neige 现在还提供：
 
-- `teambrain-profile`
-- `teambrain-rules`
+- `neige-profile`
+- `neige-rules`
 
 推荐用法：
 
-- `teambrain-profile` 用于更新 L1 队员长期个人档案
-- `teambrain-rules` 用于更新 L4 团队长期规则
+- `neige-profile` 用于更新 L1 队员长期个人档案
+- `neige-rules` 用于更新 L4 团队长期规则
 - 不要把临时调试笔记或项目局部噪声写进这些长期记忆文件
 
 示例参数：
@@ -210,7 +210,7 @@ TeamBrain 现在还提供：
 
 现在每个 Agent 都会通过 `before_prompt_build` 收到一段紧凑的写回协议。
 
-- 只有在项目状态真的变化时才调用 `teambrain-state`
+- 只有在项目状态真的变化时才调用 `neige-state`
 - 优先一次合并写回，而不是拆成很多小调用
 - 共享白板只写短摘要，长草稿继续放在私有工作区
 - 尽量用一次 `set_project_state` 同时携带阶段、活跃任务和最近更新
@@ -219,7 +219,7 @@ TeamBrain 现在还提供：
 
 ## V3 稳定性增强
 
-TeamBrain 现在又增加了两层稳定性保护：
+Neige 现在又增加了两层稳定性保护：
 
 - 针对 `main`、`coder`、`writer`、`qa` 的角色化写回职责提示
 - 在修改 `PROJECT_STATE.md` 和 `TODO.md` 之前先获取共享状态目录锁
@@ -236,11 +236,11 @@ TeamBrain 现在又增加了两层稳定性保护：
 - 覆盖内置角色的协议策略
 - 通过 `rolePolicies` 定义全新的角色
 
-这样 TeamBrain 仍然保持通用插件形态，但每个团队都可以不用改源码，直接按自己的组织结构定制协作协议。
+这样 Neige 仍然保持通用插件形态，但每个团队都可以不用改源码，直接按自己的组织结构定制协作协议。
 
 ## 当前非目标
 
-在当前“稳定化阶段”，TeamBrain **故意不试图一次解决所有问题**。
+在当前“稳定化阶段”，Neige **故意不试图一次解决所有问题**。
 
 当前明确不做：
 
@@ -253,7 +253,7 @@ TeamBrain 现在又增加了两层稳定性保护：
 
 ## Token 策略
 
-TeamBrain 现在有两层预算：
+Neige 现在有两层预算：
 
 - 插件静态预算：`promptBudget.maxTotalChars`
 - 运行时动态预算：`assemble({ tokenBudget })`
@@ -275,7 +275,7 @@ TeamBrain 现在有两层预算：
 ## GitHub Star 历史图
 
 ```md
-[![Star History Chart](https://api.star-history.com/svg?repos=cloud-11/openclaw-teambrain&type=Date)](https://star-history.com/#cloud-11/openclaw-teambrain&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=cloud-11/neige&type=Date)](https://star-history.com/#cloud-11/neige&Date)
 ```
 
 ## 致谢
@@ -288,7 +288,7 @@ TeamBrain 现在有两层预算：
 
 - 增加长期检索与向量索引
 - 增加多项目切换辅助工具
-- 增加 TeamBrain 运维命令
+- 增加 Neige 运维命令
 
 ## 许可证
 

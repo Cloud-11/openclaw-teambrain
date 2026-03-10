@@ -64,7 +64,7 @@ export class DirectoryLockTimeoutError extends Error {
   readonly lockInfo?: LockMetadata;
 
   constructor(lockDir: string, lockInfo?: LockMetadata) {
-    super(`获取 TeamBrain 写锁超时：${lockDir}${formatLockMetadata(lockInfo)}`);
+    super(`获取 Neige 写锁超时：${lockDir}${formatLockMetadata(lockInfo)}`);
     this.name = "DirectoryLockTimeoutError";
     this.lockDir = lockDir;
     this.lockInfo = lockInfo;

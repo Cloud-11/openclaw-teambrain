@@ -39,7 +39,7 @@ export function buildWritebackProtocolSection(
   return {
     title: "协作写回协议",
     content: [
-      `- ${agentLabel} 仅在任务状态真实变化时调用 \`teambrain-state\`。`,
+      `- ${agentLabel} 仅在任务状态真实变化时调用 \`neige-state\`。`,
       "- 优先合并一次写回，避免连续重复更新相同状态。",
       "- `set_project_state`：阶段切换、活跃任务变更、最近更新摘要。",
       "- `upsert_todo`：新增待办或更新完成状态。",

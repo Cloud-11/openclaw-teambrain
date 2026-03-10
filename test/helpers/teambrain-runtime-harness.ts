@@ -42,13 +42,13 @@ export async function createRegisteredTeamBrainHarness(
   let beforePromptBuildHandler: BeforePromptBuildHandler | undefined;
 
   await plugin.register({
-    config: {
-      plugins: {
-        slots: {
-          contextEngine: "teambrain",
+      config: {
+        plugins: {
+          slots: {
+            contextEngine: "neige",
+          },
         },
       },
-    },
     pluginConfig: config,
     resolvePath: (input: string) => input,
     registerContextEngine: (_id, factory) => {

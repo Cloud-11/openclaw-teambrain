@@ -31,7 +31,7 @@ function getTodoPath(config: TeamBrainConfig): string {
 }
 
 function getLockDir(config: TeamBrainConfig): string {
-  return join(getStateDir(config), ".teambrain.lock");
+  return join(getStateDir(config), ".neige.lock");
 }
 
 function readString(params: Record<string, unknown>, key: string): string | undefined {
@@ -214,10 +214,10 @@ export function createTeamBrainWritebackTool(
   options?: WritebackToolOptions,
 ): PluginTool {
   return {
-    name: "teambrain-state",
-    label: "TeamBrain State",
+    name: "neige-state",
+    label: "Neige State",
     description:
-      "更新 TeamBrain 的项目共享白板文件。支持写入 PROJECT_STATE.md 与 TODO.md。",
+      "更新 Neige 的项目共享白板文件。支持写入 PROJECT_STATE.md 与 TODO.md。",
     parameters: {
       type: "object",
       additionalProperties: false,
@@ -271,7 +271,7 @@ export function createTeamBrainWritebackTool(
         );
       } catch (error) {
         if (error instanceof DirectoryLockTimeoutError) {
-          return toolResult(`获取 TeamBrain 写锁失败：${error.message}`, {
+          return toolResult(`获取 Neige 写锁失败：${error.message}`, {
             action,
             lockDir: error.lockDir,
             lockInfo: error.lockInfo,

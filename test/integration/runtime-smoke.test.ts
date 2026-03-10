@@ -53,21 +53,21 @@ describe("teambrain runtime smoke", () => {
       agentId: "coder",
     });
     expect(promptHookResult?.appendSystemContext).toContain("C#");
-    expect(promptHookResult?.appendSystemContext).toContain("teambrain-state");
+    expect(promptHookResult?.appendSystemContext).toContain("neige-state");
 
-    await getRegisteredTool(harness, "teambrain-profile").execute("call-1", {
+    await getRegisteredTool(harness, "neige-profile").execute("call-1", {
       action: "upsert_section",
       agentId: "coder",
       section: "待提升",
       items: ["异步优化"],
       mode: "replace",
     });
-    await getRegisteredTool(harness, "teambrain-rules").execute("call-2", {
+    await getRegisteredTool(harness, "neige-rules").execute("call-2", {
       action: "upsert_rule",
       ruleId: "exception-handling",
       text: "所有新代码必须包含异常处理。",
     });
-    await getRegisteredTool(harness, "teambrain-state").execute("call-3", {
+    await getRegisteredTool(harness, "neige-state").execute("call-3", {
       action: "upsert_todo",
       text: "补集成 smoke 测试",
       done: true,

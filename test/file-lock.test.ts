@@ -16,7 +16,7 @@ describe("withDirectoryLock", () => {
     const root = await mkdtemp(join(tmpdir(), "teambrain-file-lock-"));
     tempDirs.push(root);
 
-    const lockDir = join(root, ".teambrain.lock");
+    const lockDir = join(root, ".neige.lock");
     await mkdir(lockDir, { recursive: true });
     await writeFile(
       join(lockDir, ".lock-meta.json"),
@@ -55,7 +55,7 @@ describe("withDirectoryLock", () => {
     const root = await mkdtemp(join(tmpdir(), "teambrain-file-lock-meta-"));
     tempDirs.push(root);
 
-    const lockDir = join(root, ".teambrain.lock");
+    const lockDir = join(root, ".neige.lock");
     let snapshot = "";
 
     await withDirectoryLock(

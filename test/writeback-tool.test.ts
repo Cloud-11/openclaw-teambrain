@@ -114,7 +114,7 @@ describe("createTeamBrainWritebackTool", () => {
     });
 
     const stateDir = join(root, "my-dev-team/projects/stardew-mod/state");
-    const lockDir = join(stateDir, ".teambrain.lock");
+    const lockDir = join(stateDir, ".neige.lock");
     await mkdir(lockDir, { recursive: true });
 
     const tool = createTeamBrainWritebackTool(config);
@@ -148,7 +148,7 @@ describe("createTeamBrainWritebackTool", () => {
     });
 
     const stateDir = join(root, "my-dev-team/projects/stardew-mod/state");
-    const lockDir = join(stateDir, ".teambrain.lock");
+    const lockDir = join(stateDir, ".neige.lock");
     await mkdir(lockDir, { recursive: true });
     await writeUtf8(
       join(lockDir, ".lock-meta.json"),
@@ -178,7 +178,7 @@ describe("createTeamBrainWritebackTool", () => {
       done: false,
     });
 
-    expect(result.content[0]?.text).toContain("获取 TeamBrain 写锁失败");
+    expect(result.content[0]?.text).toContain("获取 Neige 写锁失败");
     expect((result.details as { lockInfo?: { callId?: string } }).lockInfo?.callId).toBe(
       "call-stuck",
     );

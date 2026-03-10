@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢你关注 `OpenClaw TeamBrain`。
+感谢你关注 `OpenClaw Neige`。
 
 ## 开始之前
 

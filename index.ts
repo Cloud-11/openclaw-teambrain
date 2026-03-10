@@ -5,26 +5,26 @@ import { buildAgentPromptAddition } from "./src/hooks.ts";
 import { createTeamBrainProfileTool, createTeamBrainRulesTool } from "./src/memory-tools.ts";
 import { createTeamBrainWritebackTool } from "./src/writeback-tool.ts";
 
-function isTeamBrainActive(api: OpenClawPluginApi): boolean {
-  return api.config.plugins?.slots?.contextEngine === "teambrain";
+function isNeigeActive(api: OpenClawPluginApi): boolean {
+  return api.config.plugins?.slots?.contextEngine === "neige";
 }
 
 const plugin = {
-  id: "teambrain",
-  name: "OpenClaw TeamBrain",
-  description: "将团队规则、项目白板和 Agent 私有上下文从代码仓库外部装配到 OpenClaw 中",
+  id: "neige",
+  name: "Neige",
+  description: "将团队规则、项目白板和 Agent 私有上下文从代码仓库外部装配到 OpenClaw 中，形成长期协作系统",
   version: "0.1.0",
   kind: "context-engine",
   async register(api: OpenClawPluginApi) {
     const config = normalizeTeamBrainConfig(api.pluginConfig ?? {}, api.resolvePath);
 
-    api.registerContextEngine("teambrain", () => createTeamBrainContextEngine(config));
+    api.registerContextEngine("neige", () => createTeamBrainContextEngine(config));
     api.registerTool(createTeamBrainWritebackTool(config));
     api.registerTool(createTeamBrainProfileTool(config));
     api.registerTool(createTeamBrainRulesTool(config));
 
     api.on("before_prompt_build", async (_event, ctx) => {
-      if (!isTeamBrainActive(api)) {
+      if (!isNeigeActive(api)) {
         return;
       }
 

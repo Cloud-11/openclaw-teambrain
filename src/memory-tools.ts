@@ -177,8 +177,8 @@ function toolResult(text: string, details: unknown) {
 
 export function createTeamBrainProfileTool(config: TeamBrainConfig): PluginTool {
   return {
-    name: "teambrain-profile",
-    label: "TeamBrain Profile",
+    name: "neige-profile",
+    label: "Neige Profile",
     description: "受控更新 Agent 长期个人档案，按标准 section 追加或覆盖。",
     parameters: {
       type: "object",
@@ -239,8 +239,8 @@ export function createTeamBrainProfileTool(config: TeamBrainConfig): PluginTool 
 
 export function createTeamBrainRulesTool(config: TeamBrainConfig): PluginTool {
   return {
-    name: "teambrain-rules",
-    label: "TeamBrain Rules",
+    name: "neige-rules",
+    label: "Neige Rules",
     description: "受控更新团队长期规则条目，支持 upsert 与删除。",
     parameters: {
       type: "object",

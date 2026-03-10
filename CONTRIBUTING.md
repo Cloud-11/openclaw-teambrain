@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in `OpenClaw TeamBrain`.
+Thanks for your interest in `OpenClaw Neige`.
 
 ## Before You Start
 

@@ -12,8 +12,8 @@ function resolveMaxChars(config: TeamBrainConfig, tokenBudget?: number): number 
 export function createTeamBrainContextEngine(config: TeamBrainConfig) {
   return {
     info: {
-      id: "teambrain",
-      name: "OpenClaw TeamBrain",
+      id: "neige",
+      name: "Neige",
       version: "0.1.0",
     },
     async ingest() {

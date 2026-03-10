@@ -50,7 +50,7 @@ describe("buildAgentPromptAddition", () => {
     expect(result).toContain("下午 6 点重置逻辑要小心");
   });
 
-  it("会注入紧凑的写回协议，指导 Agent 调用 teambrain-state", async () => {
+  it("会注入紧凑的写回协议，指导 Agent 调用 neige-state", async () => {
     const root = await mkdtemp(join(tmpdir(), "teambrain-hook-protocol-"));
     tempDirs.push(root);
 
@@ -65,7 +65,7 @@ describe("buildAgentPromptAddition", () => {
       agentId: "coder",
     });
 
-    expect(result).toContain("teambrain-state");
+    expect(result).toContain("neige-state");
     expect(result).toContain("set_project_state");
     expect(result).toContain("upsert_todo");
     expect(result).toContain("仅在任务状态真实变化时调用");
