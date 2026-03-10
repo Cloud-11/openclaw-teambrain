@@ -129,5 +129,77 @@ describe("buildAgentPromptAddition", () => {
     expect(prompt).toContain("Planner 负责拆解项目阶段和里程碑。");
     expect(prompt).toContain("Planner 优先统一维护 PROJECT_STATE.md。");
   });
+
+  it("会通过 hook 注入硬性规则与当前状态摘要", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-required-"));
+    tempDirs.push(root);
+
+    await writeUtf8(
+      join(root, "my-dev-team/memory_global/global_rules.md"),
+      "# 团队长期规则\n\n- [tests] 新功能必须补测试\n",
+    );
+    await writeUtf8(
+      join(root, "my-dev-team/projects/stardew-mod/state/PROJECT_STATE.md"),
+      "# 项目状态：stardew-mod\n\n## 当前阶段\n开发中\n\n## 活跃任务\n- 修复崩溃\n\n## 最近更新\n已开始排查。\n",
+    );
+    await writeUtf8(
+      join(root, "my-dev-team/projects/stardew-mod/state/TODO.md"),
+      "# TODO\n\n- [ ] 修复崩溃\n",
+    );
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+    });
+
+    const result = await buildAgentPromptAddition({
+      config,
+      agentId: "coder",
+    });
+
+    expect(result).toContain("Hard Rules");
+    expect(result).toContain("新功能必须补测试");
+    expect(result).toContain("Current State");
+    expect(result).toContain("开发中");
+    expect(result).toContain("修复崩溃");
+  });
+
+  it("在预算很紧时会优先保留规则和状态，而不是技能内容", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-hook-priority-"));
+    tempDirs.push(root);
+
+    await writeUtf8(
+      join(root, "my-dev-team/memory_global/global_rules.md"),
+      "# 团队长期规则\n\n- [tests] 新功能必须补测试\n",
+    );
+    await writeUtf8(
+      join(root, "my-dev-team/projects/stardew-mod/state/PROJECT_STATE.md"),
+      "# 项目状态：stardew-mod\n\n## 当前阶段\n开发中\n\n## 活跃任务\n- 修复崩溃\n\n## 最近更新\n已开始排查。\n",
+    );
+    await writeUtf8(
+      join(root, "my-dev-team/memory_global/skills/debug-wsl.md"),
+      `# Skill: debug-wsl\n\n${"这是很长的技能内容。".repeat(200)}`,
+    );
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "stardew-mod",
+      promptBudget: {
+        maxTotalChars: 400,
+        maxCharsPerSection: 300,
+      },
+    });
+
+    const result = await buildAgentPromptAddition({
+      config,
+      agentId: "coder",
+    });
+
+    expect(result).toContain("Hard Rules");
+    expect(result).toContain("Current State");
+    expect(result).not.toContain("Skill: debug-wsl");
+  });
 });
 
