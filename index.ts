@@ -7,6 +7,7 @@ import {
   createNeigeCloseoutTool,
   createNeigeTaskTool,
 } from "./src/collaboration-tools.ts";
+import { createNeigeHandoffTool, createNeigePacketTool } from "./src/dispatch-tools.ts";
 import { createNeigeProfileTool, createNeigeRulesTool } from "./src/memory-tools.ts";
 import {
   createNeigeCandidateTool,
@@ -58,6 +59,8 @@ const plugin = {
     registerRoleScopedTool(api, config, "neige-task", () => createNeigeTaskTool(config));
     registerRoleScopedTool(api, config, "neige-checkpoint", () => createNeigeCheckpointTool(config));
     registerRoleScopedTool(api, config, "neige-closeout", () => createNeigeCloseoutTool(config));
+    registerRoleScopedTool(api, config, "neige-packet", () => createNeigePacketTool(config));
+    registerRoleScopedTool(api, config, "neige-handoff", () => createNeigeHandoffTool(config));
     registerRoleScopedTool(api, config, "neige-candidate", () => createNeigeCandidateTool(config));
     registerRoleScopedTool(api, config, "neige-skill", () => createNeigeSkillTool(config));
     registerRoleScopedTool(api, config, "neige-hook-preview", () => createNeigeHookPreviewTool(config));
