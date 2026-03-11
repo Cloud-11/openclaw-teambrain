@@ -13,6 +13,11 @@ import {
   type TaskDraft,
 } from "./task-draft.ts";
 import {
+  evaluateReliabilityGuard,
+  type NeigeReliabilityGuardResult,
+  type NeigeReliabilityInput,
+} from "./reliability.ts";
+import {
   triageNeigeRequest,
   type NeigeTriageInput,
   type NeigeTriageResult,
@@ -33,6 +38,7 @@ export type NeigeMainIntakeInput = {
   action: "intake";
   request: string;
   signals: NeigeTriageSignals;
+  reliability?: NeigeReliabilityInput;
   taskOwner?: string;
   definitionOfDone?: string[];
   constraints?: string[];
@@ -53,6 +59,16 @@ export type NeigeMainSessionRefResult = {
 };
 
 export type NeigeMainResult =
+  | {
+      mode: "reliability-blocked";
+      summary: string;
+      reliability: NeigeReliabilityGuardResult;
+      triage?: undefined;
+      taskDraft?: undefined;
+      taskCard?: undefined;
+      sessionRef?: undefined;
+      portfolio?: undefined;
+    }
   | {
       mode: "session-response";
       summary: string;
@@ -184,6 +200,15 @@ export async function runNeigeMainAction(
     request: requireNonEmptyRequest(input.request),
     signals: input.signals,
   };
+  const reliability = evaluateReliabilityGuard(input.reliability);
+  if (!reliability.allowed) {
+    return {
+      mode: "reliability-blocked",
+      summary: `请求被可靠性保护拦截：${reliability.reason}`,
+      reliability,
+    };
+  }
+
   const triage = triageNeigeRequest(triageInput);
 
   if (!triage.shouldCreateTaskDraft) {

@@ -166,4 +166,71 @@ describe("main runtime", () => {
     expect(board).toContain("## 项目：alpha");
     expect(board).toContain("## 项目：beta");
   });
+
+  it("会在 reliability breaker 打开时拦截 intake，并且不创建 Task Card", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-main-breaker-"));
+    tempDirs.push(root);
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    const result = await runNeigeMainAction(config, {
+      action: "intake",
+      request: "为 sandbox 实现可靠性层",
+      signals: {
+        hasExplicitDeliverable: true,
+        requiresTracking: true,
+        activeProjectId: "sandbox",
+      },
+      reliability: {
+        breakerOpen: true,
+      },
+    });
+
+    expect(result.mode).toBe("reliability-blocked");
+    if (result.mode !== "reliability-blocked") {
+      throw new Error(`unexpected mode: ${result.mode}`);
+    }
+
+    expect(result.reliability.code).toBe("breaker-open");
+    await expect(
+      stat(join(root, "my-dev-team/projects/sandbox/state/task-cards")),
+    ).rejects.toBeDefined();
+  });
+
+  it("会在超出 retry budget 时拦截 intake，并保留结构化原因", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-main-retry-"));
+    tempDirs.push(root);
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    const result = await runNeigeMainAction(config, {
+      action: "intake",
+      request: "继续推进 sandbox 的可靠性层",
+      signals: {
+        hasExplicitDeliverable: true,
+        requiresTracking: true,
+        activeProjectId: "sandbox",
+      },
+      reliability: {
+        retryCount: 3,
+        retryBudget: 2,
+      },
+    });
+
+    expect(result.mode).toBe("reliability-blocked");
+    if (result.mode !== "reliability-blocked") {
+      throw new Error(`unexpected mode: ${result.mode}`);
+    }
+
+    expect(result.reliability.code).toBe("retry-budget-exceeded");
+    expect(result.summary).toContain("可靠性保护");
+  });
 });

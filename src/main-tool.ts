@@ -2,8 +2,10 @@ import type { PluginTool } from "openclaw/plugin-sdk/core";
 import type { NeigeConfig } from "./config.ts";
 import {
   runNeigeMainAction,
+  type NeigeMainIntakeInput,
   type NeigeMainSessionInput,
 } from "./main-runtime.ts";
+import type { NeigeReliabilityInput } from "./reliability.ts";
 import type { NeigeTriageSignals } from "./triage.ts";
 
 function toolResult(text: string, details: unknown) {
@@ -43,6 +45,11 @@ function readStringArray(params: Record<string, unknown>, key: string): string[]
 
 function readRecord(value: unknown): Record<string, unknown> | undefined {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+}
+
+function readNumber(params: Record<string, unknown>, key: string): number | undefined {
+  const value = params[key];
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
 function readSignals(params: Record<string, unknown>): NeigeTriageSignals {
@@ -96,6 +103,27 @@ function readSession(params: Record<string, unknown>): NeigeMainSessionInput | u
     createdAt: readString(session, "createdAt"),
     endedAt: typeof session.endedAt === "string" ? session.endedAt : null,
   };
+}
+
+function readReliability(params: Record<string, unknown>): NeigeReliabilityInput | undefined {
+  const reliability = readRecord(params.reliability);
+  if (!reliability) {
+    return undefined;
+  }
+
+  const result: NeigeReliabilityInput = {
+    breakerOpen: reliability.breakerOpen === true,
+    retryCount: readNumber(reliability, "retryCount"),
+    retryBudget: readNumber(reliability, "retryBudget"),
+    handoffDepth: readNumber(reliability, "handoffDepth"),
+    maxHandoffDepth: readNumber(reliability, "maxHandoffDepth"),
+    activeChildren: readNumber(reliability, "activeChildren"),
+    maxActiveChildren: readNumber(reliability, "maxActiveChildren"),
+    elapsedMs: readNumber(reliability, "elapsedMs"),
+    timeoutMs: readNumber(reliability, "timeoutMs"),
+  };
+
+  return Object.values(result).some((value) => value !== undefined) ? result : undefined;
 }
 
 export function createNeigeMainTool(config: NeigeConfig): PluginTool {
@@ -154,6 +182,21 @@ export function createNeigeMainTool(config: NeigeConfig): PluginTool {
             affectsKnowledgeAssets: { type: "boolean" },
           },
         },
+        reliability: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            breakerOpen: { type: "boolean" },
+            retryCount: { type: "number" },
+            retryBudget: { type: "number" },
+            handoffDepth: { type: "number" },
+            maxHandoffDepth: { type: "number" },
+            activeChildren: { type: "number" },
+            maxActiveChildren: { type: "number" },
+            elapsedMs: { type: "number" },
+            timeoutMs: { type: "number" },
+          },
+        },
         session: {
           type: "object",
           additionalProperties: false,
@@ -193,6 +236,7 @@ export function createNeigeMainTool(config: NeigeConfig): PluginTool {
               action: "intake",
               request: readString(params, "request") ?? "",
               signals: readSignals(params),
+              reliability: readReliability(params),
               taskOwner: readString(params, "taskOwner"),
               definitionOfDone: readStringArray(params, "definitionOfDone"),
               constraints: readStringArray(params, "constraints"),
