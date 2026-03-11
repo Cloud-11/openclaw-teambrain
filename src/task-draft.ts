@@ -23,6 +23,9 @@ export type TaskDraft = {
 export type FinalizeTaskDraftOptions = {
   owner: string;
   definitionOfDone: string[];
+  constraints?: string[];
+  risks?: string[];
+  nextAction?: string;
 };
 
 export type FinalizeTaskDraftResult = {
@@ -74,9 +77,14 @@ function renderTaskCard(params: {
   owner: string;
   objective: string;
   definitionOfDone: string[];
+  constraints: string[];
+  risks: string[];
+  nextAction?: string;
   signal: number;
+  createdAt: string;
+  updatedAt: string;
 }): string {
-  return [
+  const blocks = [
     `# Task Card: ${params.taskId}`,
     "",
     "## 基本信息",
@@ -92,7 +100,32 @@ function renderTaskCard(params: {
     "## 完成标准",
     ...params.definitionOfDone.map((item) => `- ${item}`),
     "",
-  ].join("\n");
+  ];
+
+  if (params.constraints.length > 0) {
+    blocks.push("## 约束");
+    blocks.push(...params.constraints.map((item) => `- ${item}`));
+    blocks.push("");
+  }
+
+  if (params.risks.length > 0) {
+    blocks.push("## 风险");
+    blocks.push(...params.risks.map((item) => `- ${item}`));
+    blocks.push("");
+  }
+
+  if (params.nextAction) {
+    blocks.push("## 下一步");
+    blocks.push(params.nextAction);
+    blocks.push("");
+  }
+
+  blocks.push("## 时间");
+  blocks.push(`- Created At: ${params.createdAt}`);
+  blocks.push(`- Updated At: ${params.updatedAt}`);
+  blocks.push("");
+
+  return blocks.join("\n");
 }
 
 function renderTasksIndex(existing: string | undefined, entry: {
@@ -147,6 +180,8 @@ export async function finalizeTaskDraft(
   const taskCardPath = join(taskCardsDir, `${taskId}.md`);
   const tasksIndexPath = join(stateDir, "TASKS.md");
   const owner = options.owner.trim();
+  const createdAt = nowIso();
+  const updatedAt = createdAt;
 
   await mkdir(taskCardsDir, { recursive: true });
 
@@ -160,7 +195,12 @@ export async function finalizeTaskDraft(
       owner,
       objective: draft.request,
       definitionOfDone: options.definitionOfDone,
+      constraints: options.constraints?.map((item) => item.trim()).filter(Boolean) ?? [],
+      risks: options.risks?.map((item) => item.trim()).filter(Boolean) ?? [],
+      nextAction: options.nextAction?.trim() || undefined,
       signal: draft.scope === "project-scope" ? 2 : 1,
+      createdAt,
+      updatedAt,
     }),
     "utf8",
   );

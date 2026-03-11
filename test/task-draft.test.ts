@@ -60,6 +60,9 @@ describe("task draft workflow", () => {
     const result = await finalizeTaskDraft(config, draft, {
       owner: "coder",
       definitionOfDone: ["测试通过", "状态写回可用"],
+      constraints: ["不要覆盖现有状态文件", "全部文件写入 UTF-8"],
+      risks: ["WSL 与 Windows 路径容易混淆"],
+      nextAction: "继续补真实运行时验证",
     });
 
     await expectPathExists(result.taskCardPath);
@@ -71,6 +74,15 @@ describe("task draft workflow", () => {
     expect(card).toContain("# Task Card:");
     expect(card).toContain("Project: sandbox");
     expect(card).toContain("Owner: coder");
+    expect(card).toContain("## 约束");
+    expect(card).toContain("不要覆盖现有状态文件");
+    expect(card).toContain("## 风险");
+    expect(card).toContain("WSL 与 Windows 路径容易混淆");
+    expect(card).toContain("## 下一步");
+    expect(card).toContain("继续补真实运行时验证");
+    expect(card).toContain("## 时间");
+    expect(card).toContain("Created At:");
+    expect(card).toContain("Updated At:");
     expect(index).toContain(result.taskId);
     expect(index).toContain("doing");
   });

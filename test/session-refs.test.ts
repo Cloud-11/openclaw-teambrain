@@ -36,6 +36,9 @@ describe("session refs", () => {
     expect(ref.roleId).toBe("main");
     expect(ref.kind).toBe("main-session");
     expect(ref.linkedTaskId).toBe("TASK-20260311-001");
+    expect(ref.taskOwner).toBeUndefined();
+    expect(ref.taskScope).toBeUndefined();
+    expect(ref.linkedAt).toBeDefined();
     expect(ref.endedAt).toBeNull();
   });
 
@@ -56,6 +59,8 @@ describe("session refs", () => {
       kind: "main-session",
       linkedTaskId: "TASK-20260311-001",
       purpose: "主线协调",
+      taskOwner: "main",
+      taskScope: "project-scope",
     });
     const second = createSessionRef({
       sessionKey: "agent:coder:subagent:abc123",
@@ -82,7 +87,12 @@ describe("session refs", () => {
     const content = JSON.parse(await readFile(result.filePath, "utf8")) as {
       taskId: string;
       projectId: string;
-      sessionRefs: Array<{ sessionKey: string }>;
+      sessionRefs: Array<{
+        sessionKey: string;
+        taskOwner?: string;
+        taskScope?: string;
+        linkedAt?: string;
+      }>;
     };
 
     expect(content.taskId).toBe("TASK-20260311-001");
@@ -91,6 +101,9 @@ describe("session refs", () => {
       "agent:main:main",
       "agent:coder:subagent:abc123",
     ]);
+    expect(content.sessionRefs[0]?.taskOwner).toBe("main");
+    expect(content.sessionRefs[0]?.taskScope).toBe("project-scope");
+    expect(content.sessionRefs[0]?.linkedAt).toBeDefined();
   });
 
   it("会维护 session -> task/project 的索引", async () => {

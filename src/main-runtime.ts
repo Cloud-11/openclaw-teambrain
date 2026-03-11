@@ -35,6 +35,9 @@ export type NeigeMainIntakeInput = {
   signals: NeigeTriageSignals;
   taskOwner?: string;
   definitionOfDone?: string[];
+  constraints?: string[];
+  risks?: string[];
+  nextAction?: string;
   session?: NeigeMainSessionInput;
 };
 
@@ -127,6 +130,8 @@ async function maybeAttachSessionRef(
   config: NeigeConfig,
   input: NeigeMainIntakeInput,
   taskCard: FinalizeTaskDraftResult,
+  taskScope: string,
+  taskOwner: string,
 ): Promise<NeigeMainSessionRefResult | undefined> {
   if (!input.session) {
     return undefined;
@@ -139,6 +144,8 @@ async function maybeAttachSessionRef(
     kind: input.session.kind,
     linkedTaskId: taskCard.taskId,
     purpose: input.session.purpose,
+    taskOwner,
+    taskScope,
     createdAt: input.session.createdAt,
     endedAt: input.session.endedAt,
   });
@@ -188,11 +195,15 @@ export async function runNeigeMainAction(
   }
 
   const taskDraft = buildTaskDraftInput(input, triage);
+  const taskOwner = resolveTaskOwner(input, triage);
   const taskCard = await finalizeTaskDraft(config, taskDraft, {
-    owner: resolveTaskOwner(input, triage),
+    owner: taskOwner,
     definitionOfDone: buildDefinitionOfDone(input, triage),
+    constraints: input.constraints,
+    risks: input.risks,
+    nextAction: input.nextAction,
   });
-  const sessionRef = await maybeAttachSessionRef(config, input, taskCard);
+  const sessionRef = await maybeAttachSessionRef(config, input, taskCard, triage.scope, taskOwner);
 
   return {
     mode: "task-created",

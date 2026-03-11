@@ -71,6 +71,9 @@ describe("main runtime", () => {
       },
       taskOwner: "coder",
       definitionOfDone: ["测试通过", "真实运行时可调用"],
+      constraints: ["不要破坏现有 sandbox 状态", "保持 UTF-8 文本写入"],
+      risks: ["真实 Gateway 可能与隔离副本不同步"],
+      nextAction: "继续做真实 WSL/OpenClaw 复测",
       session: {
         sessionKey: "agent:main:main",
         agentId: "main",
@@ -92,7 +95,13 @@ describe("main runtime", () => {
 
     const card = await readFile(result.taskCard!.taskCardPath, "utf8");
     const taskSessions = JSON.parse(await readFile(result.sessionRef!.taskSessionsPath, "utf8")) as {
-      sessionRefs: Array<{ sessionKey: string; linkedTaskId: string }>;
+      sessionRefs: Array<{
+        sessionKey: string;
+        linkedTaskId: string;
+        taskOwner?: string;
+        taskScope?: string;
+        linkedAt?: string;
+      }>;
     };
     const sessionIndex = JSON.parse(await readFile(result.sessionRef!.sessionIndexPath, "utf8")) as {
       entries: Array<{ sessionKey: string; taskId: string; projectId: string }>;
@@ -100,9 +109,18 @@ describe("main runtime", () => {
 
     expect(card).toContain("Project: sandbox");
     expect(card).toContain("Owner: coder");
+    expect(card).toContain("## 约束");
+    expect(card).toContain("不要破坏现有 sandbox 状态");
+    expect(card).toContain("## 风险");
+    expect(card).toContain("真实 Gateway 可能与隔离副本不同步");
+    expect(card).toContain("## 下一步");
+    expect(card).toContain("继续做真实 WSL/OpenClaw 复测");
     expect(taskSessions.sessionRefs).toHaveLength(1);
     expect(taskSessions.sessionRefs[0]?.sessionKey).toBe("agent:main:main");
     expect(taskSessions.sessionRefs[0]?.linkedTaskId).toBe(result.taskCard!.taskId);
+    expect(taskSessions.sessionRefs[0]?.taskOwner).toBe("coder");
+    expect(taskSessions.sessionRefs[0]?.taskScope).toBe("project-scope");
+    expect(taskSessions.sessionRefs[0]?.linkedAt).toBeDefined();
     expect(sessionIndex.entries).toEqual([
       {
         sessionKey: "agent:main:main",

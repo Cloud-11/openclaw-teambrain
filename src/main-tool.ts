@@ -123,6 +123,21 @@ export function createNeigeMainTool(config: NeigeConfig): PluginTool {
             type: "string",
           },
         },
+        constraints: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+        },
+        risks: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+        },
+        nextAction: {
+          type: "string",
+        },
         signals: {
           type: "object",
           additionalProperties: false,
@@ -180,6 +195,9 @@ export function createNeigeMainTool(config: NeigeConfig): PluginTool {
               signals: readSignals(params),
               taskOwner: readString(params, "taskOwner"),
               definitionOfDone: readStringArray(params, "definitionOfDone"),
+              constraints: readStringArray(params, "constraints"),
+              risks: readStringArray(params, "risks"),
+              nextAction: readString(params, "nextAction"),
               session: readSession(params),
             });
 

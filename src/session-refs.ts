@@ -17,6 +17,9 @@ export type SessionRef = {
   kind: SessionRefKind;
   linkedTaskId: string;
   purpose: string;
+  taskOwner?: string;
+  taskScope?: string;
+  linkedAt: string;
   createdAt: string;
   endedAt: string | null;
 };
@@ -83,6 +86,9 @@ export function createSessionRef(params: {
   kind: SessionRefKind;
   linkedTaskId: string;
   purpose: string;
+  taskOwner?: string;
+  taskScope?: string;
+  linkedAt?: string;
   createdAt?: string;
   endedAt?: string | null;
 }): SessionRef {
@@ -93,6 +99,9 @@ export function createSessionRef(params: {
     kind: params.kind,
     linkedTaskId: params.linkedTaskId.trim(),
     purpose: params.purpose.trim(),
+    taskOwner: params.taskOwner?.trim() || undefined,
+    taskScope: params.taskScope?.trim() || undefined,
+    linkedAt: params.linkedAt ?? nowIso(),
     createdAt: params.createdAt ?? nowIso(),
     endedAt: params.endedAt ?? null,
   };
