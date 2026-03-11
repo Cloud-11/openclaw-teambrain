@@ -17,6 +17,7 @@ import { isNeigeToolAllowedForAgent } from "./src/role-enforcement.ts";
 import { createNeigeReviewTool } from "./src/review-tools.ts";
 import { createNeigeWritebackTool } from "./src/writeback-tool.ts";
 import { createNeigePortfolioTool } from "./src/portfolio-board.ts";
+import { createNeigeMainTool } from "./src/main-tool.ts";
 
 function isNeigeActive(api: OpenClawPluginApi): boolean {
   return api.config.plugins?.slots?.contextEngine === "neige";
@@ -53,6 +54,7 @@ const plugin = {
     registerRoleScopedTool(api, config, "neige-state", () => createNeigeWritebackTool(config));
     registerRoleScopedTool(api, config, "neige-profile", () => createNeigeProfileTool(config));
     registerRoleScopedTool(api, config, "neige-rules", () => createNeigeRulesTool(config));
+    registerRoleScopedTool(api, config, "neige-main", () => createNeigeMainTool(config));
     registerRoleScopedTool(api, config, "neige-task", () => createNeigeTaskTool(config));
     registerRoleScopedTool(api, config, "neige-checkpoint", () => createNeigeCheckpointTool(config));
     registerRoleScopedTool(api, config, "neige-closeout", () => createNeigeCloseoutTool(config));

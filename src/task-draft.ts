@@ -28,6 +28,7 @@ export type FinalizeTaskDraftOptions = {
 export type FinalizeTaskDraftResult = {
   taskId: string;
   scope: TaskDraftScope;
+  stateProjectId: string;
   taskCardPath: string;
   tasksIndexPath: string;
 };
@@ -42,7 +43,11 @@ function buildId(prefix: string): string {
   return `${prefix}-${stamp}-${suffix}`;
 }
 
-function resolveStateProjectId(config: NeigeConfig, scope: TaskDraftScope, projectId?: string): string {
+export function resolveTaskDraftStateProjectId(
+  config: NeigeConfig,
+  scope: TaskDraftScope,
+  projectId?: string,
+): string {
   if (scope === "project-scope") {
     return projectId?.trim() || config.projectId;
   }
@@ -135,7 +140,7 @@ export async function finalizeTaskDraft(
   draft: TaskDraft,
   options: FinalizeTaskDraftOptions,
 ): Promise<FinalizeTaskDraftResult> {
-  const stateProjectId = resolveStateProjectId(config, draft.scope, draft.projectId);
+  const stateProjectId = resolveTaskDraftStateProjectId(config, draft.scope, draft.projectId);
   const stateDir = getStateDir(config, stateProjectId);
   const taskCardsDir = join(stateDir, "task-cards");
   const taskId = buildId("TASK");
@@ -174,6 +179,7 @@ export async function finalizeTaskDraft(
   return {
     taskId,
     scope: draft.scope,
+    stateProjectId,
     taskCardPath,
     tasksIndexPath,
   };
