@@ -4,6 +4,7 @@ import {
   runNeigeMainAction,
   type NeigeMainIntakeInput,
   type NeigeMainSessionInput,
+  type NeigeMainTaskLinksInput,
 } from "./main-runtime.ts";
 import type { NeigeReliabilityInput } from "./reliability.ts";
 import type { NeigeTriageSignals } from "./triage.ts";
@@ -15,9 +16,9 @@ function toolResult(text: string, details: unknown) {
   };
 }
 
-function requireAction(params: Record<string, unknown>): "intake" | "portfolio" {
+function requireAction(params: Record<string, unknown>): "intake" | "portfolio" | "task-links" {
   const action = params.action;
-  if (action !== "intake" && action !== "portfolio") {
+  if (action !== "intake" && action !== "portfolio" && action !== "task-links") {
     throw new Error("action required");
   }
 
@@ -137,7 +138,13 @@ export function createNeigeMainTool(config: NeigeConfig): PluginTool {
       properties: {
         action: {
           type: "string",
-          enum: ["intake", "portfolio"],
+          enum: ["intake", "portfolio", "task-links"],
+        },
+        projectId: {
+          type: "string",
+        },
+        taskId: {
+          type: "string",
         },
         request: {
           type: "string",
@@ -232,6 +239,12 @@ export function createNeigeMainTool(config: NeigeConfig): PluginTool {
           ? await runNeigeMainAction(config, {
               action: "portfolio",
             })
+          : action === "task-links"
+            ? await runNeigeMainAction(config, {
+                action: "task-links",
+                projectId: readString(params, "projectId"),
+                taskId: readString(params, "taskId") ?? "",
+              } satisfies NeigeMainTaskLinksInput)
           : await runNeigeMainAction(config, {
               action: "intake",
               request: readString(params, "request") ?? "",

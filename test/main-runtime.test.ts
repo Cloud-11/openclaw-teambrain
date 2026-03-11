@@ -233,4 +233,73 @@ describe("main runtime", () => {
     expect(result.reliability.code).toBe("retry-budget-exceeded");
     expect(result.summary).toContain("可靠性保护");
   });
+
+  it("会在 task-links 不存在时返回空摘要", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-main-task-links-empty-"));
+    tempDirs.push(root);
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    const result = await runNeigeMainAction(config, {
+      action: "task-links",
+      projectId: "sandbox",
+      taskId: "TASK-20260311-003",
+    });
+
+    expect(result.mode).toBe("task-links-summary");
+    if (result.mode !== "task-links-summary") {
+      throw new Error(`unexpected mode: ${result.mode}`);
+    }
+
+    expect(result.taskLinks.exists).toBe(false);
+    expect(result.taskLinks.packetCount).toBe(0);
+    expect(result.taskLinks.handoffCount).toBe(0);
+  });
+
+  it("会返回 task-links 的最新 packet/handoff 摘要", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-main-task-links-"));
+    tempDirs.push(root);
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    await writeUtf8(
+      join(root, "my-dev-team/projects/sandbox/state/task-links/TASK-20260311-004.json"),
+      JSON.stringify(
+        {
+          taskId: "TASK-20260311-004",
+          projectId: "sandbox",
+          packetIds: ["PKT-20260311-001", "PKT-20260311-002"],
+          handoffIds: ["HO-20260311-001"],
+          updatedAt: "2026-03-11T12:00:00.000Z",
+        },
+        null,
+        2,
+      ),
+    );
+
+    const result = await runNeigeMainAction(config, {
+      action: "task-links",
+      projectId: "sandbox",
+      taskId: "TASK-20260311-004",
+    });
+
+    expect(result.mode).toBe("task-links-summary");
+    if (result.mode !== "task-links-summary") {
+      throw new Error(`unexpected mode: ${result.mode}`);
+    }
+
+    expect(result.taskLinks.exists).toBe(true);
+    expect(result.taskLinks.packetCount).toBe(2);
+    expect(result.taskLinks.handoffCount).toBe(1);
+    expect(result.taskLinks.latestPacketId).toBe("PKT-20260311-002");
+    expect(result.taskLinks.latestHandoffId).toBe("HO-20260311-001");
+  });
 });

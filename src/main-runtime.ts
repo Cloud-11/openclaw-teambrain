@@ -23,6 +23,7 @@ import {
   type NeigeTriageResult,
   type NeigeTriageSignals,
 } from "./triage.ts";
+import { readTaskLinksSummary, type TaskLinksSummary } from "./task-links-summary.ts";
 
 export type NeigeMainSessionInput = {
   sessionKey: string;
@@ -51,7 +52,16 @@ export type NeigeMainPortfolioInput = {
   action: "portfolio";
 };
 
-export type NeigeMainActionInput = NeigeMainIntakeInput | NeigeMainPortfolioInput;
+export type NeigeMainTaskLinksInput = {
+  action: "task-links";
+  taskId: string;
+  projectId?: string;
+};
+
+export type NeigeMainActionInput =
+  | NeigeMainIntakeInput
+  | NeigeMainPortfolioInput
+  | NeigeMainTaskLinksInput;
 
 export type NeigeMainSessionRefResult = {
   taskSessionsPath: string;
@@ -91,6 +101,17 @@ export type NeigeMainResult =
       mode: "portfolio-refreshed";
       summary: string;
       portfolio: PortfolioBoardSnapshot;
+      taskLinks?: undefined;
+      triage?: undefined;
+      taskDraft?: undefined;
+      taskCard?: undefined;
+      sessionRef?: undefined;
+    }
+  | {
+      mode: "task-links-summary";
+      summary: string;
+      taskLinks: TaskLinksSummary;
+      portfolio?: undefined;
       triage?: undefined;
       taskDraft?: undefined;
       taskCard?: undefined;
@@ -193,6 +214,23 @@ export async function runNeigeMainAction(
       mode: "portfolio-refreshed",
       summary: `已刷新 portfolio board，共 ${portfolio.summary.projectCount} 个项目。`,
       portfolio,
+    };
+  }
+
+  if (input.action === "task-links") {
+    const projectId = input.projectId?.trim() || config.projectId;
+    const taskId = input.taskId.trim();
+    const taskLinks = await readTaskLinksSummary(config, {
+      projectId,
+      taskId,
+    });
+
+    return {
+      mode: "task-links-summary",
+      summary: taskLinks.exists
+        ? `任务 ${taskId} 当前关联 ${taskLinks.packetCount} 个 packet、${taskLinks.handoffCount} 个 handoff。`
+        : `任务 ${taskId} 当前还没有 packet/handoff 引用。`,
+      taskLinks,
     };
   }
 
