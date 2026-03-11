@@ -8,6 +8,8 @@ function resolveRoleId(config: NeigeConfig, agentId?: string): string | undefine
   return config.agentMappings.roles[agentId] ?? agentId;
 }
 
+export type NeigeRoleAction = "spawn-subagent" | "initiate-handoff";
+
 export function isNeigeToolAllowedForAgent(
   config: NeigeConfig,
   agentId: string | undefined,
@@ -41,6 +43,32 @@ export function isNeigeToolAllowedForAgent(
 
   if (allowedTools.length > 0) {
     return allowedTools.includes(toolName);
+  }
+
+  return true;
+}
+
+export function isNeigeRoleActionAllowed(
+  config: NeigeConfig,
+  agentId: string | undefined,
+  action: NeigeRoleAction,
+): boolean {
+  const roleId = resolveRoleId(config, agentId);
+  if (!roleId) {
+    return true;
+  }
+
+  const policy = config.rolePolicies[roleId];
+  if (!policy) {
+    return true;
+  }
+
+  if (action === "spawn-subagent") {
+    return policy.canSpawnSubagent === true;
+  }
+
+  if (action === "initiate-handoff") {
+    return policy.canInitiateHandoff === true;
   }
 
   return true;

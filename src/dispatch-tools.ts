@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { PluginTool } from "openclaw/plugin-sdk/core";
 import type { NeigeConfig } from "./config.ts";
+import { isNeigeRoleActionAllowed } from "./role-enforcement.ts";
 import { upsertTaskLinks } from "./task-links.ts";
 
 function toolResult(text: string, details: unknown) {
@@ -56,7 +57,24 @@ async function ensureDir(filePath: string): Promise<void> {
   await mkdir(join(filePath, ".."), { recursive: true });
 }
 
-export function createNeigePacketTool(config: NeigeConfig): PluginTool {
+function requireRoleAction(
+  config: NeigeConfig,
+  agentId: string | undefined,
+  action: "spawn-subagent" | "initiate-handoff",
+): void {
+  if (isNeigeRoleActionAllowed(config, agentId, action)) {
+    return;
+  }
+
+  const roleLabel = agentId ?? "unknown";
+  if (action === "spawn-subagent") {
+    throw new Error(`role ${roleLabel} cannot spawn subagent packets`);
+  }
+
+  throw new Error(`role ${roleLabel} cannot initiate handoff`);
+}
+
+export function createNeigePacketTool(config: NeigeConfig, agentId?: string): PluginTool {
   return {
     name: "neige-packet",
     label: "Neige Packet",
@@ -99,6 +117,7 @@ export function createNeigePacketTool(config: NeigeConfig): PluginTool {
       ],
     },
     async execute(_id, rawParams) {
+      requireRoleAction(config, agentId, "spawn-subagent");
       const params = rawParams as Record<string, unknown>;
       const projectId = requireString(params, "projectId");
       const taskId = requireString(params, "taskId");
@@ -145,7 +164,7 @@ export function createNeigePacketTool(config: NeigeConfig): PluginTool {
   };
 }
 
-export function createNeigeHandoffTool(config: NeigeConfig): PluginTool {
+export function createNeigeHandoffTool(config: NeigeConfig, agentId?: string): PluginTool {
   return {
     name: "neige-handoff",
     label: "Neige Handoff",
@@ -185,6 +204,7 @@ export function createNeigeHandoffTool(config: NeigeConfig): PluginTool {
       ],
     },
     async execute(_id, rawParams) {
+      requireRoleAction(config, agentId, "initiate-handoff");
       const params = rawParams as Record<string, unknown>;
       const projectId = requireString(params, "projectId");
       const taskId = requireString(params, "taskId");

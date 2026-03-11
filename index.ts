@@ -28,7 +28,7 @@ function registerRoleScopedTool(
   api: OpenClawPluginApi,
   config: ReturnType<typeof normalizeNeigeConfig>,
   toolName: string,
-  createTool: () => Parameters<OpenClawPluginApi["registerTool"]>[0] extends infer _T ? any : never,
+  createTool: (agentId?: string) => Parameters<OpenClawPluginApi["registerTool"]>[0] extends infer _T ? any : never,
 ) {
   api.registerTool(
     (ctx) => {
@@ -36,7 +36,7 @@ function registerRoleScopedTool(
         return null;
       }
 
-      return createTool();
+      return createTool(ctx.agentId);
     },
     { name: toolName },
   );
@@ -59,8 +59,12 @@ const plugin = {
     registerRoleScopedTool(api, config, "neige-task", () => createNeigeTaskTool(config));
     registerRoleScopedTool(api, config, "neige-checkpoint", () => createNeigeCheckpointTool(config));
     registerRoleScopedTool(api, config, "neige-closeout", () => createNeigeCloseoutTool(config));
-    registerRoleScopedTool(api, config, "neige-packet", () => createNeigePacketTool(config));
-    registerRoleScopedTool(api, config, "neige-handoff", () => createNeigeHandoffTool(config));
+    registerRoleScopedTool(api, config, "neige-packet", (agentId) =>
+      createNeigePacketTool(config, agentId),
+    );
+    registerRoleScopedTool(api, config, "neige-handoff", (agentId) =>
+      createNeigeHandoffTool(config, agentId),
+    );
     registerRoleScopedTool(api, config, "neige-candidate", () => createNeigeCandidateTool(config));
     registerRoleScopedTool(api, config, "neige-skill", () => createNeigeSkillTool(config));
     registerRoleScopedTool(api, config, "neige-hook-preview", () => createNeigeHookPreviewTool(config));

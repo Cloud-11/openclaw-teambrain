@@ -27,7 +27,7 @@ describe("dispatch tools", () => {
       projectId: "sandbox",
     });
 
-    const tool = createNeigePacketTool(config);
+    const tool = createNeigePacketTool(config, "main");
     const result = await tool.execute("call-1", {
       action: "create",
       projectId: "sandbox",
@@ -82,7 +82,7 @@ describe("dispatch tools", () => {
       projectId: "sandbox",
     });
 
-    const packetTool = createNeigePacketTool(config);
+    const packetTool = createNeigePacketTool(config, "main");
     const packetResult = await packetTool.execute("call-1", {
       action: "create",
       projectId: "sandbox",
@@ -100,7 +100,7 @@ describe("dispatch tools", () => {
     });
     const packetDetails = packetResult.details as { packetId: string };
 
-    const handoffTool = createNeigeHandoffTool(config);
+    const handoffTool = createNeigeHandoffTool(config, "main");
     const handoffResult = await handoffTool.execute("call-2", {
       action: "create",
       projectId: "sandbox",
@@ -141,5 +141,93 @@ describe("dispatch tools", () => {
     expect(handoff.requiredReads).toContain("PROJECT_STATE.md");
     expect(taskLinks.packetIds).toEqual([packetDetails.packetId]);
     expect(taskLinks.handoffIds).toEqual([handoffDetails.handoffId]);
+  });
+
+  it("coder 不能创建 packet，且不会写入任何文件", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-packet-tool-denied-"));
+    tempDirs.push(root);
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    const tool = createNeigePacketTool(config, "coder");
+    await expect(
+      tool.execute("call-1", {
+        action: "create",
+        projectId: "sandbox",
+        taskId: "TASK-20260311-003",
+        fromRole: "coder",
+        toRole: "qa",
+        mode: "spawn",
+        title: "尝试自行派发",
+        objective: "这次应该被拦截",
+        contextSummary: ["coder 不应 spawn subagent"],
+        constraints: ["不要写任何文件"],
+        allowedTools: ["read"],
+        expectedOutput: ["不会执行"],
+        definitionOfDone: ["不会落盘"],
+      }),
+    ).rejects.toThrow(/spawn/i);
+
+    await expect(
+      stat(join(root, "my-dev-team/projects/sandbox/state/subagent-packets")),
+    ).rejects.toBeDefined();
+    await expect(
+      stat(join(root, "my-dev-team/projects/sandbox/state/task-links")),
+    ).rejects.toBeDefined();
+  });
+
+  it("coder 可以创建 handoff，但 qa 默认不可以", async () => {
+    const root = await mkdtemp(join(tmpdir(), "neige-handoff-tool-policy-"));
+    tempDirs.push(root);
+
+    const config = normalizeNeigeConfig({
+      brainRoot: root,
+      teamId: "my-dev-team",
+      projectId: "sandbox",
+    });
+
+    const coderTool = createNeigeHandoffTool(config, "coder");
+    const coderResult = await coderTool.execute("call-1", {
+      action: "create",
+      projectId: "sandbox",
+      taskId: "TASK-20260311-004",
+      fromRole: "coder",
+      toRole: "main",
+      reason: "需要主控接手",
+      currentGoal: "上浮阻塞",
+      currentStatus: "blocked",
+      completed: ["实现已完成"],
+      remaining: ["等待主控决策"],
+      risks: ["需要重新排期"],
+      requiredReads: ["TASK-20260311-004"],
+      expectedOutput: ["确认下一步"],
+    });
+
+    const coderDetails = coderResult.details as { filePath: string; taskLinksPath: string };
+    await expectPathExists(coderDetails.filePath);
+    await expectPathExists(coderDetails.taskLinksPath);
+
+    const qaTool = createNeigeHandoffTool(config, "qa");
+    await expect(
+      qaTool.execute("call-2", {
+        action: "create",
+        projectId: "sandbox",
+        taskId: "TASK-20260311-005",
+        fromRole: "qa",
+        toRole: "main",
+        reason: "尝试交接",
+        currentGoal: "这次应该被拦截",
+        currentStatus: "blocked",
+        completed: ["复现问题"],
+        remaining: ["等待处理"],
+        risks: ["仍有失败用例"],
+        requiredReads: ["TASK-20260311-005"],
+        expectedOutput: ["不会落盘"],
+      }),
+    ).rejects.toThrow(/handoff/i);
   });
 });

@@ -21,6 +21,11 @@ describe("normalizeNeigeConfig", () => {
     expect(config.layers.includePrivateWorkspace).toBe(false);
     expect(config.promptBudget.maxCharsPerSection).toBeGreaterThan(1000);
     expect(config.promptBudget.maxTotalChars).toBeGreaterThan(config.promptBudget.maxCharsPerSection);
+    expect(config.rolePolicies.main?.canSpawnSubagent).toBe(true);
+    expect(config.rolePolicies.main?.canInitiateHandoff).toBe(true);
+    expect(config.rolePolicies.coder?.canSpawnSubagent).toBe(false);
+    expect(config.rolePolicies.coder?.canInitiateHandoff).toBe(true);
+    expect(config.rolePolicies.qa?.canInitiateHandoff).toBe(false);
   });
 
   it("会解析角色映射与自定义角色策略", () => {
@@ -40,6 +45,8 @@ describe("normalizeNeigeConfig", () => {
             "Planner 负责拆解里程碑。",
             "Planner 优先维护 PROJECT_STATE.md。",
           ],
+          canSpawnSubagent: true,
+          canInitiateHandoff: false,
         },
       },
     });
@@ -49,6 +56,8 @@ describe("normalizeNeigeConfig", () => {
     expect(config.rolePolicies.planner?.writebackGuidance).toContain(
       "Planner 负责拆解里程碑。",
     );
+    expect(config.rolePolicies.planner?.canSpawnSubagent).toBe(true);
+    expect(config.rolePolicies.planner?.canInitiateHandoff).toBe(false);
   });
 });
 
